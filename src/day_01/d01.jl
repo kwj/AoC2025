@@ -6,12 +6,16 @@ function parse_file(fname::String)
 end
 
 function d01_p1(fname::String = "input"; start_pos = 50)
+    @assert start_pos in 0:99 "The starting position of the dial must be between 0 and 99"
+
     data = parse_file(fname)
 
     count(iszero, accumulate((acc, x) -> mod(acc + x, 100), data, init = start_pos))
 end
 
 function d01_p2(fname::String = "input"; start_pos = 50)
+    @assert start_pos in 0:99 "The starting position of the dial must be between 0 and 99"
+
     data = parse_file(fname)
 
     acc = 0
