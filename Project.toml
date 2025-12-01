@@ -1,0 +1,4 @@
+name = "AoC2025"
+uuid = "ee7087f9-d7fb-4fa8-8d89-bf69fb88a53f"
+version = "0.1.0"
+authors = ["kwj <kwj@vlax.net>"]
