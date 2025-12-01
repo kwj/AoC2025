@@ -14,19 +14,6 @@ solutions = [
     "day_10/d10.jl",
     "day_11/d11.jl",
     "day_12/d12.jl",
-    "day_13/d13.jl",
-    "day_14/d14.jl",
-    "day_15/d15.jl",
-    "day_16/d16.jl",
-    "day_17/d17.jl",
-    "day_18/d18.jl",
-    "day_19/d19.jl",
-    "day_20/d20.jl",
-    "day_21/d21.jl",
-    "day_22/d22.jl",
-    "day_23/d23.jl",
-    "day_24/d24.jl",
-    "day_25/d25.jl",
     =#
 ]
 
