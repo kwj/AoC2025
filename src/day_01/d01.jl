@@ -15,7 +15,7 @@ function d01_p2(fname::String = "input")
     data = parse_file(fname)
 
     acc = 0
-    pos = 50
+    pos = 50  # This value is always non-negative. pos ∈ [0, 99]
     for x in data
         next_pos = pos + x
 
