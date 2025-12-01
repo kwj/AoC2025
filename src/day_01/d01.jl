@@ -5,17 +5,17 @@ function parse_file(fname::String)
     parse.(Int, replace.(readlines(joinpath(@__DIR__, fname)), "R" => "", "L" => "-"))
 end
 
-function d01_p1(fname::String = "input")
+function d01_p1(fname::String = "input"; start_pos = 50)
     data = parse_file(fname)
 
-    count(iszero, accumulate((acc, x) -> mod(acc + x, 100), data, init=50))
+    count(iszero, accumulate((acc, x) -> mod(acc + x, 100), data, init = start_pos))
 end
 
-function d01_p2(fname::String = "input")
+function d01_p2(fname::String = "input"; start_pos = 50)
     data = parse_file(fname)
 
     acc = 0
-    pos = 50  # This value is always non-negative. pos ∈ [0, 99]
+    pos = start_pos  # This value is always non-negative. pos ∈ [0, 99]
     for x in data
         next_pos = pos + x
 
