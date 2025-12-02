@@ -33,18 +33,18 @@ function parse_file(fname::String)
     #  [824824821, 824824827]
     #  [1188511880, 1188511890]
     #  [2121212118, 2121212124]
-    range_lst = Vector{Vector{Int}}()
+    range_lst = Vector{Tuple{Int, Int}}()
     for lst in tmp
-        nd1, nd2 = ndigits(lst[1]), ndigits(lst[2])
         r1, r2 = lst[1], lst[2]
+        nd1, nd2 = ndigits(r1), ndigits(r2)
 
         while nd1 < nd2
-            push!(range_lst, [r1, 10 ^ nd1 - 1])
+            push!(range_lst, (r1, 10 ^ nd1 - 1))
 
             r1 = 10 ^ nd1
             nd1 += 1
         end
-        push!(range_lst, [r1, r2])
+        push!(range_lst, (r1, r2))
     end
 
     range_lst
@@ -80,8 +80,7 @@ function d02_p1(fname::String = "input")
     data = filter(lst -> iseven(ndigits(lst[1])), parse_file(fname))
 
     result = Vector{Int}()
-    for lst in data
-        r1, r2 = lst[1], lst[2]
+    for (r1, r2) in data
         d = div(ndigits(r1), 2)
         append!(result, find_invalid_IDs(d, r1, r2))
     end
@@ -93,8 +92,7 @@ function d02_p2(fname::String = "input")
     data = parse_file(fname)
 
     result = Vector{Int}()
-    for lst in data
-        r1, r2 = lst[1], lst[2]
+    for (r1, r2) in data
         foreach(1:div(ndigits(r1), 2)) do d
             append!(result, find_invalid_IDs(d, r1, r2))
         end
