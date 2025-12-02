@@ -23,12 +23,9 @@ function d01_p2(fname::String = "input"; start_pos = 50)
     for x in data
         next_pos = pos + x
 
-        if iszero(next_pos)
+        acc += div(abs(next_pos), 100)
+        if next_pos <= 0 && !iszero(pos)
             acc += 1
-        elseif next_pos > 0
-            acc += div(next_pos, 100)
-        else
-            acc += div(abs(next_pos), 100) + (iszero(pos) ? 0 : 1)
         end
 
         pos = mod(next_pos, 100)
