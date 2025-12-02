@@ -19,14 +19,14 @@ And then, Julia's standard libraries:
 -->
 ## Solutions
 
-* [Day 1: Secret Entrance](./src/day_01/d01.jl) d01_p1(), d01_02()
+* [Day 1: Secret Entrance](./src/day_01/d01.jl) d01_p1(), d01_p2()
+* [Day 2: Gift Shop](./src/day_02/d02.jl) d02_p1(), d02_p2()
 <!--
-* [Day 2: ](./src/day_02/d02.jl) d02_p1(), d02_02()
-* [Day 3: ](./src/day_03/d03.jl) d03_p1(), d03_02()
-* [Day 4: ](./src/day_04/d04.jl) d04_p1(), d04_02()
-* [Day 5: ](./src/day_05/d05.jl) d05_p1(), d05_02()
-* [Day 6: ](./src/day_06/d06.jl) d06_p1(), d06_02()
-* [Day 7: ](./src/day_07/d07.jl) d07_p1(), d07_02()
+* [Day 3: ](./src/day_03/d03.jl) d03_p1(), d03_p2()
+* [Day 4: ](./src/day_04/d04.jl) d04_p1(), d04_p2()
+* [Day 5: ](./src/day_05/d05.jl) d05_p1(), d05_p2()
+* [Day 6: ](./src/day_06/d06.jl) d06_p1(), d06_p2()
+* [Day 7: ](./src/day_07/d07.jl) d07_p1(), d07_p2()
 * [Day 8: ](./src/day_08/d08.jl) d08_p1(), d08_p2()
 * [Day 9: ](./src/day_09/d09.jl) d09_p1(), d09_p2()
 * [Day 10: ](./src/day_10/d10.jl) d10_p1(), d10_p2()
