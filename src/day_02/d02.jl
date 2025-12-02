@@ -54,10 +54,9 @@ function find_invalid_IDs(d::Int, r1::Int, r2::Int)
 
     n = div(r1, 10 ^ (nd - d))
     while true
-        x, cnt = n, rep_cnt - 1
-        while cnt > 0
+        x = n
+        for _ = 1:(rep_cnt - 1)
             x = 10 ^ d * x + n
-            cnt -= 1
         end
 
         n += 1
