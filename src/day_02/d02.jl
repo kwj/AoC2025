@@ -48,8 +48,9 @@ function find_invalid_IDs(d::Int, r1::Int, r2::Int)
     result = Vector{Int}()
 
     nd = ndigits(r1)
-    rep_cnt, r = divrem(nd, d)
+    2d > nd && return result
 
+    rep_cnt, r = divrem(nd, d)
     r != 0 && return result
 
     n = div(r1, 10 ^ (nd - d))
