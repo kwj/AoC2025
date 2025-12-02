@@ -1,4 +1,10 @@
 
+#=
+[Memo]
+Solved this problem without using string comparison. However, using it
+might be slightly inefficient, but it could be a simpler approach.
+=#
+
 module Day02
 
 function parse_file(fname::String)
