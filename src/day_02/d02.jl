@@ -89,10 +89,8 @@ function d02_p2(fname::String = "input")
     result = Vector{Int}()
     for lst in data
         r1, r2 = lst[1], lst[2]
-        d = div(ndigits(r1), 2)
-        while d > 0
+        foreach(1:div(ndigits(r1), 2)) do d
             append!(result, find_invalid_IDs(d, r1, r2))
-            d -= 1
         end
     end
 
