@@ -21,8 +21,8 @@ And then, Julia's standard libraries:
 
 * [Day 1: Secret Entrance](./src/day_01/d01.jl) d01_p1(), d01_p2()
 * [Day 2: Gift Shop](./src/day_02/d02.jl) d02_p1(), d02_p2()
+* [Day 3: Lobby](./src/day_03/d03.jl) d03_p1(), d03_p2()
 <!--
-* [Day 3: ](./src/day_03/d03.jl) d03_p1(), d03_p2()
 * [Day 4: ](./src/day_04/d04.jl) d04_p1(), d04_p2()
 * [Day 5: ](./src/day_05/d05.jl) d05_p1(), d05_p2()
 * [Day 6: ](./src/day_06/d06.jl) d06_p1(), d06_p2()
