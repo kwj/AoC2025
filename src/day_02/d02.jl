@@ -50,7 +50,10 @@ function parse_file(fname::String)
     range_lst
 end
 
-function find_invalid_IDs(d::Int, r1::Int, r2::Int)
+# Find invalid IDs which length of repeating block is `d` from [r1, r2]
+#   241241        999
+#   ^^^ d = 3     ^ d = 1
+function find_invalid_IDs(r1::Int, r2::Int, d::Int)
     result = Vector{Int}()
 
     nd = ndigits(r1)
@@ -82,7 +85,7 @@ function d02_p1(fname::String = "input")
     result = Vector{Int}()
     for (r1, r2) in data
         d = div(ndigits(r1), 2)
-        append!(result, find_invalid_IDs(d, r1, r2))
+        append!(result, find_invalid_IDs(r1, r2, d))
     end
 
     sum(unique(result))
@@ -94,7 +97,7 @@ function d02_p2(fname::String = "input")
     result = Vector{Int}()
     for (r1, r2) in data
         foreach(1:div(ndigits(r1), 2)) do d
-            append!(result, find_invalid_IDs(d, r1, r2))
+            append!(result, find_invalid_IDs(r1, r2, d))
         end
     end
 
