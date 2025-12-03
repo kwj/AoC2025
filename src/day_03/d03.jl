@@ -17,17 +17,14 @@ function find_max_joltage(bank::AbstractVector{Int}, n_batts::Int)
     acc
 end
 
-function d03_p1(fname::String = "input"; n_batts = 2)
+function d03(fname::String, n_batts::Int)
     data = parse_file(fname)
 
     sum(map(bank -> find_max_joltage(bank, n_batts), data))
 end
 
-function d03_p2(fname::String = "input"; n_batts = 12)
-    data = parse_file(fname)
-
-    sum(map(bank -> find_max_joltage(bank, n_batts), data))
-end
+d03_p1(fname::String = "input"; n_batts = 2) = d03(fname, n_batts)
+d03_p2(fname::String = "input"; n_batts = 12) = d03(fname, n_batts)
 
 end #module
 
