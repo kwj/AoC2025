@@ -6,6 +6,8 @@ function parse_file(fname::String)
 end
 
 function find_max_joltage(bank::AbstractVector{Int}, n_batts::Int)
+    @assert n_batts <= length(bank) "n_batts must be less than or equal to the total number of batteries"
+
     left = firstindex(bank)
     acc = 0
     for x = reverse(0:n_batts - 1)
