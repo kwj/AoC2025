@@ -2,7 +2,7 @@
 module Day03
 
 function parse_file(fname::String)
-    map(lst -> parse.(Int, lst), split.(readlines(joinpath(@__DIR__, fname)), ""))
+    map(lst -> parse.(Int, lst), collect.(readlines(joinpath(@__DIR__, fname))))
 end
 
 function find_max_joltage(bank::AbstractVector{Int}, rest::Int, left::Int, acc::Int)
