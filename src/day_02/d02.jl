@@ -54,6 +54,8 @@ end
 #   241241        999
 #   ^^^ d = 3     ^ d = 1
 function find_invalid_IDs(r1::Int, r2::Int, d::Int)
+    @assert ndigits(r1) == ndigits(r2) "The number of digits in the start number and end number must be the same"
+
     result = Vector{Int}()
 
     nd = ndigits(r1)
