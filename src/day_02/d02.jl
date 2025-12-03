@@ -17,22 +17,9 @@ function parse_file(fname::String)
     )
 
     # Normalization (match the number of digits in the start number and end number)
-    #
-    # the example ID ranges in the problem statement
-    # 13-element Vector{Vector{Int64}}:
-    #  [11, 22]
-    #  [95, 99]
-    #  [100, 115]
-    #  [998, 999]
-    #  [1000, 1012]
-    #  [222220, 222224]
-    #  [446443, 446449]
-    #  [565653, 565659]
-    #  [1698522, 1698528]
-    #  [38593856, 38593862]
-    #  [824824821, 824824827]
-    #  [1188511880, 1188511890]
-    #  [2121212118, 2121212124]
+    #   [11, 22] -> (11, 22)
+    #   [95, 115] -> (95, 99), (100, 115)
+    #     ..., and so on
     range_lst = Vector{Tuple{Int, Int}}()
     for lst in tmp
         r1, r2 = lst[1], lst[2]
