@@ -49,11 +49,10 @@ function find_invalid_IDs(r1::Int, r2::Int, d::Int)
     result = Vector{Int}()
 
     nd = ndigits(r1)
-    2d > nd && return result
-
     rep_cnt, r = divrem(nd, d)
-    r != 0 && return result
+    (r != 0 || rep_cnt < 2) && return result
 
+    # n: repeating block number (the first `d` digits of r1)
     n = div(r1, 10 ^ (nd - d))
     while true
         x = n
