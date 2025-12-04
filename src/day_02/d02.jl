@@ -23,6 +23,8 @@ function parse_file(fname::String)
     range_lst = Vector{Tuple{Int, Int}}()
     for lst in tmp
         r1, r2 = lst[1], lst[2]
+        @assert r1 <= r2 "Invalid range"
+
         nd1, nd2 = ndigits(r1), ndigits(r2)
 
         while nd1 < nd2
@@ -42,6 +44,7 @@ end
 #   ^^^ d = 3     ^ d = 1
 function find_invalid_IDs(r1::Int, r2::Int, d::Int)
     @assert ndigits(r1) == ndigits(r2) "The number of digits in the start number and end number must be the same"
+    @assert d > 0 "`d` must be positive"
 
     result = Vector{Int}()
 
