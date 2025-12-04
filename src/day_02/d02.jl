@@ -39,7 +39,7 @@ function parse_file(fname::String)
     range_lst
 end
 
-# Find invalid IDs which length of repeating block is `d` from [r1, r2]
+# Find invalid IDs whose repeating block are d digits from [r1, r2]
 #   241241        999
 #   ^^^ d = 3     ^ d = 1
 function find_invalid_IDs(r1::Int, r2::Int, d::Int)
@@ -55,12 +55,15 @@ function find_invalid_IDs(r1::Int, r2::Int, d::Int)
     # n: repeating block number (the first `d` digits of r1)
     n = div(r1, 10 ^ (nd - d))
     while true
+        # create an invalid ID
         x = n
         for _ = 1:(rep_cnt - 1)
             x = 10 ^ d * x + n
         end
 
         n += 1
+
+        # boundary check
         x > r2 && break
         x < r1 && continue
 

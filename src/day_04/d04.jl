@@ -5,23 +5,24 @@ const CIdx = CartesianIndex
 const NBRS = CIdx.([(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)])
 
 function parse_file(fname::String)
+    # 0: empty space, 1: roll of paper
     map(ch -> ch == '@' ? 1 : 0, stack(collect.(readlines(joinpath(@__DIR__, fname))), dims = 1))
 end
 
-function num_adj_rolls(grid::Array{Int, 2}, pos::CIdx)
+function num_adj_rolls(grid::Matrix{Int}, pos::CIdx{2})
     acc = 0
-    for dir in NBRS
-        acc += get(grid, pos + dir, 0)
+    for delta in NBRS
+        acc += get(grid, pos + delta, 0)
     end
 
     acc
 end
 
-function find_rolls_to_remove(grid::Array{Int, 2}, thr::Int)
+function find_rolls_to_remove(grid::Matrix{Int}, thr::Int)
     q = Vector{CIdx{2}}()
 
     for pos in CartesianIndices(grid)
-        # empty space
+        # if the space is empty, skip
         grid[pos] == 0 && continue
 
         if num_adj_rolls(grid, pos) < thr
