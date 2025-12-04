@@ -72,10 +72,12 @@ function find_invalid_IDs(r1::Int, r2::Int, d::Int)
 end
 
 function d02_p1(fname::String = "input")
-    data = filter(lst -> iseven(ndigits(lst[1])), parse_file(fname))
+    data = parse_file(fname)
 
     result = Vector{Int}()
     for (r1, r2) in data
+        isodd(ndigits(r1)) && continue
+
         d = div(ndigits(r1), 2)
         append!(result, find_invalid_IDs(r1, r2, d))
     end
