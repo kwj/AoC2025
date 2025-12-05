@@ -2,7 +2,7 @@
 module Day05
 
 function parse_file(fname::String)
-    data = split(chomp(read(joinpath(@__DIR__, fname), String)), "\n\n")
+    data = split(readchomp(joinpath(@__DIR__, fname)), "\n\n")
 
     rngs = make_ranges(data[1])
     ingrs = parse.(Int, split(data[2]))

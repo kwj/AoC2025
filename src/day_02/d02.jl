@@ -11,7 +11,7 @@ function parse_file(fname::String)
     tmp = sort(
         broadcast(
             lst -> parse.(Int, lst),
-            split.(split(chomp(read(joinpath(@__DIR__, fname), String)), ","), "-")
+            split.(split(readchomp(joinpath(@__DIR__, fname)), ","), "-")
         ),
         by = first
     )
