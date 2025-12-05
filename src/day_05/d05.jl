@@ -21,6 +21,8 @@ function make_ranges(rng_data::AbstractString)
         counter += c
         if merging == false
             if !isempty(rngs) && last(rngs[end]) == n
+                # if the start value of range is equal to the end value of the immediately preceding range object,
+                # set the new start value to that object's start value and discard the object
                 start = first(rngs[end])
                 pop!(rngs)
             else
