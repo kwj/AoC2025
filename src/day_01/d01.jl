@@ -8,19 +8,19 @@ end
 function d01_p1(fname::String = "input"; start_pos = 50)
     @assert start_pos in 0:99 "The starting position of the dial must be between 0 and 99"
 
-    data = parse_file(fname)
+    displacement_lst = parse_file(fname)
 
-    count(iszero, accumulate((acc, x) -> mod(acc + x, 100), data, init = start_pos))
+    count(iszero, accumulate((acc, x) -> mod(acc + x, 100), displacement_lst, init = start_pos))
 end
 
 function d01_p2(fname::String = "input"; start_pos = 50)
     @assert start_pos in 0:99 "The starting position of the dial must be between 0 and 99"
 
-    data = parse_file(fname)
+    displacement_lst = parse_file(fname)
 
     acc = 0
     pos = start_pos  # This value is always non-negative. pos ∈ [0, 99]
-    for x in data
+    for x in displacement_lst
         next_pos = pos + x
 
         acc += div(abs(next_pos), 100)

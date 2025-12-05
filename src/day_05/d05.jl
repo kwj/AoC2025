@@ -41,7 +41,9 @@ end
 function d05_p1(fname::String = "input")
     rngs, ingrs = parse_file(fname)
 
-    count(id -> any(rng -> id ∈ rng, rngs), ingrs)
+    count(ingrs) do id
+        any(rng -> id ∈ rng, rngs)
+    end
 end
 
 function d05_p2(fname::String = "input")

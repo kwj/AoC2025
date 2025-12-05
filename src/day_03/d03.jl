@@ -20,9 +20,9 @@ function find_max_joltage(bank::AbstractVector{Int}, n_batts::Int)
 end
 
 function d03(fname::String, n_batts::Int)
-    data = parse_file(fname)
+    bank_lst = parse_file(fname)
 
-    sum(map(bank -> find_max_joltage(bank, n_batts), data))
+    sum(bank -> find_max_joltage(bank, n_batts), bank_lst)
 end
 
 d03_p1(fname::String = "input"; n_batts = 2) = d03(fname, n_batts)

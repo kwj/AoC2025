@@ -74,10 +74,10 @@ function find_invalid_IDs(r1::Int, r2::Int, d::Int)
 end
 
 function d02_p1(fname::String = "input")
-    data = parse_file(fname)
+    rng_tpls = parse_file(fname)
 
     result = Vector{Int}()
-    for (r1, r2) in data
+    for (r1, r2) in rng_tpls
         isodd(ndigits(r1)) && continue
 
         d = div(ndigits(r1), 2)
@@ -88,10 +88,10 @@ function d02_p1(fname::String = "input")
 end
 
 function d02_p2(fname::String = "input")
-    data = parse_file(fname)
+    rng_tpls = parse_file(fname)
 
     result = Vector{Int}()
-    for (r1, r2) in data
+    for (r1, r2) in rng_tpls
         foreach(1:div(ndigits(r1), 2)) do d
             append!(result, find_invalid_IDs(r1, r2, d))
         end
