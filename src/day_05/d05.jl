@@ -13,7 +13,7 @@ end
 function make_ranges(rng_data::AbstractString)
     rngs = Vector{UnitRange{Int}}()
 
-    # merging of overlap areas for fresh ingredient ID ranges
+    # merge overlapping areas within the fresh ingredient ID ranges
     start = 0
     counter = 0
     merging = false
@@ -28,8 +28,8 @@ function make_ranges(rng_data::AbstractString)
             end
             merging = true
         elseif iszero(counter)
-            merging = false
             push!(rngs, range(start, n))
+            merging = false
         end
     end
 
