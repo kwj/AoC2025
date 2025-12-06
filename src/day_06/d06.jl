@@ -7,18 +7,21 @@ function parse_file(fname::String)
     matrix = stack(collect.(@view data[1:end - 1]), dims = 1)
 
     sep_indices = findall(col -> all(==(' '), col), eachcol(matrix))
-    rng_lst = zip(vcat(1, sep_indices .+ 1), vcat(sep_indices .- 1, size(matrix, 2)))
+    spans = map(
+        ((start, stop),) -> start:stop,
+        zip(vcat(1, sep_indices .+ 1), vcat(sep_indices .- 1, size(matrix, 2)))
+    )
 
-    op_lst = map(s -> s == "+" ? (+) : (*), split(data[end]))
+    ops = map(s -> s == "+" ? (+) : (*), split(data[end]))
 
-    matrix, rng_lst, op_lst
+    matrix, spans, ops
 end
 
 function d06(fname::String, fn::Function)
-    matrix, rng_lst, op_lst = parse_file(fname)
+    matrix, spans, ops = parse_file(fname)
 
-    sum(zip(rng_lst, op_lst)) do ((start, stop), op)
-        reduce(op, parse.(Int, join.(fn(@view matrix[:, start:stop]))))
+    sum(zip(spans, ops)) do (span, op)
+        reduce(op, parse.(Int, join.(fn(@view matrix[:, span]))))
     end
 end
 
