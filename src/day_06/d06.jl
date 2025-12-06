@@ -17,12 +17,9 @@ end
 function d06(fname::String, fn::Function)
     matrix, rng_lst, op_lst = parse_file(fname)
 
-    acc = 0
-    for ((start, stop), op) in zip(rng_lst, op_lst)
-        acc += reduce(op, parse.(Int, join.(fn(@view matrix[:, start:stop]))))
+    sum(zip(rng_lst, op_lst)) do ((start, stop), op)
+        reduce(op, parse.(Int, join.(fn(@view matrix[:, start:stop]))))
     end
-
-    acc
 end
 
 d06_p1(fname::String = "input") = d06(fname, eachrow)
