@@ -10,31 +10,27 @@ function parse_file(fname::String)
     rngs, ingrs
 end
 
-# make a list of fresh ingredient ID range objects.
-# each range doesn't overlap.
-#
-# Note:
-# Julia's default sorting algorithm is stable, and this
-# implementation relies on it.
+# make a list of fresh ingredient ID range objects. each range doesn't overlap.
 function make_ranges(rng_data::AbstractString)
-    rngs = Vector{UnitRange{Int}}()
+    # example: event_seq
+    #   "1-3\n5-7\n10-15\n7-13"
+    #   --> [(1, 1), (3, -1), (5, 1), (7, 1), (7, -1), (10, 1), (13, -1), (15, -1)]
+    event_seq = sort(
+        zip(parse.(Int, split(rng_data, !isnumeric)), Iterators.cycle((1, -1))) |> collect,
+        lt = (x, y) -> (x[1] < y[1] || (x[1] == y[1] && x[2] > y[2]))
+    )
 
+    # example: rngs
+    #   [(1, 1), (3, -1), (5, 1), (7, 1), (7, -1), (10, 1), (13, -1), (15, -1)]
+    #   --> [1:3, 5:15]
+    rngs = Vector{UnitRange{Int}}()
     start = 0
     counter = 0
     merging = false
-    for (n, c) in sort(zip(parse.(Int, split(rng_data, !isnumeric)), Iterators.cycle((1, -1))) |> collect, by = first)
+    for (n, c) in event_seq
         counter += c
         if merging == false
-            if !isempty(rngs) && last(rngs[end]) == n
-                # if the start value of the new range is equal to the end value of the immediately preceding range object,
-                # set the new start value to that object's start value and discard the object.
-                #
-                # example: [a, b], [b, ?] -> [a, ?]
-                start = first(rngs[end])
-                pop!(rngs)
-            else
-                start = n
-            end
+            start = n
             merging = true
         elseif iszero(counter)
             push!(rngs, range(start, n))
