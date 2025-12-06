@@ -17,11 +17,9 @@ end
 function d06(fname::String, fn::Function)
     matrix, rngs, op_lst = parse_file(fname)
 
-    q = Vector{Int}()
     acc = 0
     for (op, (start, stop)) in zip(op_lst, rngs)
         acc += reduce(op, parse.(Int, join.(fn(@view matrix[:, start:stop]))))
-        empty!(q)
     end
 
     acc
