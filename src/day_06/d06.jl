@@ -10,40 +10,39 @@ function parse_file(fname::String)
     matrix, op_lst
 end
 
-function d06_p1(fname::String = "input")
-    char_mt, op_lst = parse_file(fname)
-    mt = parse.(Int, stack(split.(reduce.(*, eachrow(char_mt))), dims = 1))
-
+function chs_to_int(chs::AbstractArray{Char})
     acc = 0
-    for (idx, col) in pairs(eachcol(mt))
-        acc += reduce(op_lst[idx], col)
+    for ch in chs
+        !isnumeric(ch) && continue
+        acc = acc * 10 + (ch - '0')
     end
 
     acc
 end
 
-function d06_p2(fname::String = "input")
-    char_mt, op_lst = parse_file(fname)
-    sep_str = " " ^ size(char_mt, 1)
-
-    vs = reduce.(*, eachcol(char_mt))
-    push!(vs, sep_str)  # add a record terminator for the last record
+function d06(fname::String, fn::Function)
+    matrix, op_lst = parse_file(fname)
+    sep_indices = findall(col -> all(==(' '), col), eachcol(matrix))
+    rngs = zip(vcat(1, map(x -> x + 1, sep_indices)), vcat(map(x -> x - 1, sep_indices), size(matrix, 2)))
 
     q = Vector{Int}()
     idx = 1
     acc = 0
-    for s in vs
-        if s != sep_str
-            push!(q, parse(Int, s))
-        else
-            acc += reduce(op_lst[idx], q)
-            empty!(q)
-            idx += 1
+    for (start, stop) in rngs
+        for chs in eachrow(fn(@view matrix[:, start:stop]))
+            push!(q, chs_to_int(chs))
         end
+        acc += reduce(op_lst[idx], q)
+        empty!(q)
+        idx += 1
     end
 
     acc
+
 end
+
+d06_p1(fname::String = "input") = d06(fname, identity)
+d06_p2(fname::String = "input") = d06(fname, transpose)
 
 end #module
 
