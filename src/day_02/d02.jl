@@ -52,7 +52,7 @@ function find_invalid_IDs(r1::Int, r2::Int, d::Int)
     rep_cnt, r = divrem(nd, d)
     (r != 0 || rep_cnt < 2) && return result
 
-    # n: repeating block number (the first `d` digits of r1)
+    # n: repeating block number (the initial value is the first `d` digits of r1)
     n = div(r1, 10 ^ (nd - d))
     while true
         # create an invalid ID

@@ -10,10 +10,15 @@ function parse_file(fname::String)
     rngs, ingrs
 end
 
+# make a list of fresh ingredient ID range objects.
+# each range doesn't overlap.
+#
+# Note:
+# Julia's default sorting algorithm is stable, and this
+# implementation relies on it.
 function make_ranges(rng_data::AbstractString)
     rngs = Vector{UnitRange{Int}}()
 
-    # merge overlapping areas within the fresh ingredient ID ranges
     start = 0
     counter = 0
     merging = false
@@ -22,7 +27,7 @@ function make_ranges(rng_data::AbstractString)
         if merging == false
             if !isempty(rngs) && last(rngs[end]) == n
                 # if the start value of the new range is equal to the end value of the immediately preceding range object,
-                # set the new start value to that object's start value and discard the object
+                # set the new start value to that object's start value and discard the object.
                 #
                 # example: [a, b], [b, ?] -> [a, ?]
                 start = first(rngs[end])
