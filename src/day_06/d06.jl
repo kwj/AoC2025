@@ -14,29 +14,14 @@ function parse_file(fname::String)
     matrix, rngs, op_lst
 end
 
-function chs_to_int(chs::AbstractArray{Char})
-    acc = 0
-    for ch in chs
-        !isnumeric(ch) && continue
-        acc = acc * 10 + (ch - '0')
-    end
-
-    acc
-end
-
 function d06(fname::String, fn::Function)
     matrix, rngs, op_lst = parse_file(fname)
 
     q = Vector{Int}()
-    idx = 1
     acc = 0
-    for (start, stop) in rngs
-        for chs in fn(@view matrix[:, start:stop])
-            push!(q, chs_to_int(chs))
-        end
-        acc += reduce(op_lst[idx], q)
+    for (op, (start, stop)) in zip(op_lst, rngs)
+        acc += reduce(op, parse.(Int, join.(fn(@view matrix[:, start:stop]))))
         empty!(q)
-        idx += 1
     end
 
     acc
