@@ -6,8 +6,8 @@ solutions = [
     "day_03/d03.jl",
     "day_04/d04.jl",
     "day_05/d05.jl",
-    #=
     "day_06/d06.jl",
+    #=
     "day_07/d07.jl",
     "day_08/d08.jl",
     "day_09/d09.jl",
