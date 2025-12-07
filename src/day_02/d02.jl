@@ -76,28 +76,26 @@ end
 function d02_p1(fname::String = "input")
     rng_tpls = parse_file(fname)
 
-    result = Vector{Int}()
-    for (r1, r2) in rng_tpls
-        isodd(ndigits(r1)) && continue
-
-        d = div(ndigits(r1), 2)
-        append!(result, find_invalid_IDs(r1, r2, d))
+    sum(rng_tpls) do (r1, r2)
+        if (d2 = ndigits(r1); isodd(d2))
+            0
+        else
+            sum(find_invalid_IDs(r1, r2, div(d2, 2)))
+        end
     end
-
-    sum(unique(result))
 end
 
 function d02_p2(fname::String = "input")
     rng_tpls = parse_file(fname)
 
-    result = Vector{Int}()
-    for (r1, r2) in rng_tpls
+    q = Vector{Int}()
+    sum(rng_tpls) do (r1, r2)
+        empty!(q)
         foreach(1:div(ndigits(r1), 2)) do d
-            append!(result, find_invalid_IDs(r1, r2, d))
+            append!(q, find_invalid_IDs(r1, r2, d))
         end
+        sum(unique(q))
     end
-
-    sum(unique(result))
 end
 
 end #module
