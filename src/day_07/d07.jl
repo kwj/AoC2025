@@ -12,16 +12,16 @@ function d07(fname::String)
     dp_tbl = zeros(Int, size(grid))
     dp_tbl[findfirst(==('S'), grid)] = 1
 
-    for r = 1:(size(grid, 1) - 1)
-        beam_columns = findall(!iszero, @view dp_tbl[r, :])
+    for r = 2:last(axes(grid, 1))
+        beam_col_indices = findall(!iszero, @view dp_tbl[r - 1, :])
 
-        for c in beam_columns
-            if grid[r + 1, c] == '^'
-                dp_tbl[r + 1, c - 1] += dp_tbl[r, c]
-                dp_tbl[r + 1, c + 1] += dp_tbl[r, c]
+        for c in beam_col_indices
+            if grid[r, c] == '^'
+                dp_tbl[r, c - 1] += dp_tbl[r - 1, c]
+                dp_tbl[r, c + 1] += dp_tbl[r - 1, c]
                 n_split += 1
             else
-                dp_tbl[r + 1, c] += dp_tbl[r, c]
+                dp_tbl[r, c] += dp_tbl[r - 1, c]
             end
         end
     end
