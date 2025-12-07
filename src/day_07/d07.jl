@@ -1,6 +1,9 @@
 
 module Day07
 
+# column-oriented version
+# all tachyon beams move from left to right in this solution
+
 function parse_file(fname::String)
     stack(collect.(readlines(joinpath(@__DIR__, fname))))
 end
