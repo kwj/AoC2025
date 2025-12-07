@@ -10,7 +10,7 @@ function d01_p1(fname::String = "input"; start_pos = 50)
 
     displacement_lst = parse_file(fname)
 
-    count(iszero, accumulate((acc, x) -> mod(acc + x, 100), displacement_lst, init = start_pos))
+    count(iszero, accumulate((pos, x) -> mod(pos + x, 100), displacement_lst, init = start_pos))
 end
 
 function d01_p2(fname::String = "input"; start_pos = 50)
