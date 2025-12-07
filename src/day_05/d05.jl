@@ -15,9 +15,14 @@ function make_ranges(rng_data::AbstractString)
     # example: event_seq
     #   "1-3\n5-7\n10-15\n7-13"
     #   --> [(1, 1), (3, -1), (5, 1), (7, 1), (7, -1), (10, 1), (13, -1), (15, -1)]
+    #
+    # Note (*1):
+    # When the start of a range and the end of a range occur at the same timing,
+    # the start takes precedence over sorting. In the above example,
+    # (7, 1) takes precedence over (7, -1).
     event_seq = sort(
         zip(parse.(Int, split(rng_data, !isnumeric)), Iterators.cycle((1, -1))) |> collect,
-        lt = (x, y) -> (x[1] < y[1] || (x[1] == y[1] && x[2] > y[2]))
+        lt = (x, y) -> (x[1] < y[1] || (x[1] == y[1] && x[2] > y[2]))  # (*1)
     )
 
     # example: rngs
