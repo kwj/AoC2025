@@ -1,30 +1,45 @@
 
-#=
-[Memo]
-Solved this problem without using string comparison. However, using it
-might be slightly inefficient, but it could be a simpler approach.
-=#
-
 module Day02
 
-function parse_file(fname::String)
-    tmp = sort(
-        broadcast(
-            lst -> parse.(Int, lst),
-            split.(split(readchomp(joinpath(@__DIR__, fname)), ","), "-")
-        ),
-        by = first
+# make a list of range tuples. each range doesn't overlap.
+function make_ranges(rng_data::AbstractString)
+    # example: event_seq
+    #   "1-3,5-7,10-15,7-13"
+    #   --> [(1, 1), (3, -1), (5, 1), (7, 1), (7, -1), (10, 1), (13, -1), (15, -1)]
+    #
+    # Note (*1):
+    # When the start of a range and the end of a range occur at the same timing,
+    # the start takes precedence over sorting. In the above example,
+    # (7, 1) takes precedence over (7, -1).
+    event_seq = sort(
+        zip(parse.(Int, split(rng_data, !isnumeric)), Iterators.cycle((1, -1))) |> collect,
+        lt = (x, y) -> (x[1] < y[1] || (x[1] == y[1] && x[2] > y[2]))  # (*1)
     )
 
-    # Normalization (match the number of digits in the start number and end number)
-    #   [11, 22] -> (11, 22)
-    #   [95, 115] -> (95, 99), (100, 115)
-    #     ..., and so on
-    range_lst = Vector{Tuple{Int, Int}}()
-    for lst in tmp
-        r1, r2 = lst[1], lst[2]
-        @assert r1 <= r2 "Invalid range"
+    # example: rngs
+    #   [(1, 1), (3, -1), (5, 1), (7, 1), (7, -1), (10, 1), (13, -1), (15, -1)]
+    #   --> [(1, 3), (5, 15)]
+    rngs = Vector{Tuple{Int, Int}}()
+    start = 0
+    counter = 0
+    merging = false
+    for (n, c) in event_seq
+        counter += c
+        if merging == false
+            start = n
+            merging = true
+        elseif iszero(counter)
+            push!(rngs, (start, n))
+            merging = false
+        end
+    end
 
+    rngs
+end
+
+function parse_file(fname::String)
+    range_lst = Vector{Tuple{Int, Int}}()
+    for (r1, r2) in make_ranges(readchomp(joinpath(@__DIR__, fname)))
         nd1, nd2 = ndigits(r1), ndigits(r2)
 
         while nd1 < nd2
