@@ -9,7 +9,7 @@ struct Box
     z::Int
 end
 
-distance(p1::Box, p2::Box) = (p1.x - p2.x) ^ 2 + (p1.y - p2.y) ^ 2 + (p1.z - p2.z) ^ 2
+distance(b1::Box, b2::Box) = (b1.x - b2.x) ^ 2 + (b1.y - b2.y) ^ 2 + (b1.z - b2.z) ^ 2
 
 function parse_file(fname::String)
     map(split.(readlines(joinpath(@__DIR__, fname)), !isnumeric)) do v
