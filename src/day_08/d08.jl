@@ -27,37 +27,31 @@ function make_conn_lst(boxes::Vector{Box})
     conns
 end
 
-function d08_p1(fname::String = "input"; cnt = 1_000)
+function d08(fname::String, thr)
     boxes = parse_file(fname)
     conns = make_conn_lst(boxes)
     dj = Disjoint(size(boxes, 1))
 
-    for (_, (i, j)) in Iterators.take(conns, cnt)
-        is_same(dj, i, j) && continue
+    p1, p2 = 0, 0
+    for (cnt, (_, (i, j))) in pairs(conns)
         unite!(dj, i, j)
-    end
 
-    reduce(*, sort(map(length, groups(dj)), rev = true)[1:3])
-end
-
-function d08_p2(fname::String = "input")
-    boxes = parse_file(fname)
-    conns = make_conn_lst(boxes)
-    dj = Disjoint(size(boxes, 1))
-
-    res = 0
-    for (_, (i, j)) in conns
-        is_same(dj, i, j) && continue
-        unite!(dj, i, j)
+        if cnt == thr
+            p1 = reduce(*, sort(map(length, groups(dj)), rev = true)[1:3])
+            break
+        end
 
         if group_size(dj, i) == length(boxes)
-            res = boxes[i].x * boxes[j].x
+            p2 = boxes[i].x * boxes[j].x
             break
         end
     end
 
-    res
+    p1, p2
 end
+
+d08_p1(fname::String = "input"; thr = 1_000) = d08(fname, thr)[1]
+d08_p2(fname::String = "input"; thr = 0) = d08(fname, thr)[2]
 
 end #module
 
