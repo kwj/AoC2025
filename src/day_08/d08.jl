@@ -41,6 +41,7 @@ function d08(fname::String, thr)
 
         if cnt == thr
             p1 = reduce(*, sort(map(length, groups(dj)), rev = true)[1:3])
+            break
         end
 
         if group_size(dj, i) == length(boxes)
