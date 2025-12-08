@@ -1,35 +1,34 @@
 
 module Day07
 
-# column-oriented version
-# all tachyon beams move from left to right in this solution
-
 function parse_file(fname::String)
-    stack(collect.(readlines(joinpath(@__DIR__, fname))))
+    collect.(readlines(joinpath(@__DIR__, fname)))
 end
 
 function d07(fname::String)
-    grid = parse_file(fname)
+    header, rows... = parse_file(fname)
+    @assert all(line -> length(line) == length(header), rows) "valid input data"
 
+    cur_beams = zeros(Int, size(header))
+    cur_beams[findfirst(==('S'), header)] = 1
+    next_beams = zeros(Int, size(header))
     n_split = 0
-    dp_tbl = zeros(Int, size(grid))
-    dp_tbl[findfirst(==('S'), grid)] = 1
 
-    for c = 2:last(axes(grid, 2))
-        beam_row_indices = findall(!iszero, @view dp_tbl[:, c - 1])
-
-        for r in beam_row_indices
-            if grid[r, c] == '^'
-                dp_tbl[r - 1, c] += dp_tbl[r, c - 1]
-                dp_tbl[r + 1, c] += dp_tbl[r, c - 1]
+    for line in rows
+        fill!(next_beams, 0)
+        for idx in findall(!iszero, cur_beams)
+            if line[idx] == '^'
+                next_beams[idx - 1] += cur_beams[idx]
+                next_beams[idx + 1] += cur_beams[idx]
                 n_split += 1
             else
-                dp_tbl[r, c] += dp_tbl[r, c - 1]
+                next_beams[idx] += cur_beams[idx]
             end
         end
+        cur_beams, next_beams = next_beams, cur_beams
     end
 
-    n_split, sum(@view dp_tbl[:, end])
+    n_split, sum(cur_beams)
 end
 
 d07_p1(fname::String = "input") = d07(fname)[1]
