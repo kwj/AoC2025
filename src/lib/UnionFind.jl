@@ -7,7 +7,7 @@ mutable struct Disjoint{T <: Signed}
     total::T
 
     function Disjoint(n::T) where T <: Signed
-        n <= 0 ? error("the size of set must be positive") : new{T}(fill(-1, n), zeros(n), 0)
+        n <= 0 ? error("the size of set must be positive") : new{T}(fill(-1, n), zeros(T, n), 0)
     end
 end
 
