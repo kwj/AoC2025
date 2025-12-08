@@ -34,7 +34,7 @@ end
 function d08(fname::String, thr)
     boxes = parse_file(fname)
     conns = make_conn_lst(boxes)
-    dj = Disjoint(size(boxes, 1))
+    dj = Disjoint(length(boxes))
 
     p1, p2 = 0, 0
     for (cnt, (_, (i, j))) in pairs(conns)
