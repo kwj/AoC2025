@@ -1,14 +1,17 @@
 
 module UnionFind
 
-mutable struct Disjoint
-    elems::Vector{Int}
-    rank::Vector{Int}
-    total::Int
-    Disjoint(n::Integer) = n <= 0 ? error("size of set must be positive") : new(fill(-1, n), zeros(n), 0)
+mutable struct Disjoint{T <: Signed}
+    elems::Vector{T}
+    rank::Vector{T}
+    total::T
+
+    function Disjoint(n::T) where T <: Signed
+        n <= 0 ? error("the size of set must be positive") : new{T}(fill(-1, n), zeros(n), 0)
+    end
 end
 
-function root!(self::Disjoint, n::Int)
+function root!(self::Disjoint, n)
     if self.elems[n] < 0
         n
     else
@@ -16,7 +19,7 @@ function root!(self::Disjoint, n::Int)
     end
 end
 
-function root(self::Disjoint, n::Int)
+function root(self::Disjoint, n)
     if self.elems[n] < 0
         n
     else
@@ -24,11 +27,11 @@ function root(self::Disjoint, n::Int)
     end
 end
 
-function is_same(self::Disjoint, x::Int, y::Int)
+function is_same(self::Disjoint, x, y)
     root!(self, x) == root!(self, y)
 end
 
-function unite!(self::Disjoint, x::Int, y::Int)
+function unite!(self::Disjoint, x, y)
     if self.elems[x] == -1
         self.total += 1
     end
@@ -52,7 +55,7 @@ function unite!(self::Disjoint, x::Int, y::Int)
     end
 end
 
-function group_size(self::Disjoint, x::Int)
+function group_size(self::Disjoint, x)
     if self.elems[x] == -1
         0
     else
@@ -65,12 +68,12 @@ function all_size(self::Disjoint)
 end
 
 function groups(self::Disjoint)
-    members = [Int[] for _ in axes(self.elems, 1)]
+    members = [eltype(self.elems)[] for _ in axes(self.elems, 1)]
     for i in axes(self.elems, 1)
         push!(members[root(self, i)], i)
     end
 
-    res = Vector{Vector{Int}}()
+    res = Vector{eltype(members)}()
     for i in axes(members, 1)
         if !isempty(members[i])
             push!(res, members[i])
