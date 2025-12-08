@@ -20,10 +20,12 @@ end
 function make_conn_lst(boxes::Vector{Box})
     conns = Vector{Tuple{Int, Tuple{Int, Int}}}()
     sizehint!(conns, div(length(boxes) * (length(boxes) - 1), 2))
+
     for i = 1:length(boxes) - 1, j = (i + 1):length(boxes)
         push!(conns, (distance(boxes[i], boxes[j]), (i, j)))
     end
-    sort!(conns, lt = (x, y) -> x[1] < y[1])
+    # use the quick sort algorithm to reduce memory usage
+    sort!(conns, alg = QuickSort, by = first)
 
     conns
 end
