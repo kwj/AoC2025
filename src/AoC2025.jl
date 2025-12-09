@@ -11,8 +11,8 @@ solutions = [
     "day_06/d06.jl",
     "day_07/d07.jl",
     "day_08/d08.jl",
-    #=
     "day_09/d09.jl",
+    #=
     "day_10/d10.jl",
     "day_11/d11.jl",
     "day_12/d12.jl",

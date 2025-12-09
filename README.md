@@ -27,8 +27,8 @@ And then, Julia's standard libraries:
 * [Day 6: Trash Compactor](./src/day_06/d06.jl) d06_p1(), d06_p2()
 * [Day 7: Laboratories](./src/day_07/d07.jl) d07_p1(), d07_p2()
 * [Day 8: Playground](./src/day_08/d08.jl) d08_p1(), d08_p2()
+* [Day 9: Movie Theater](./src/day_09/d09.jl) d09_p1(), d09_p2()
 <!--
-* [Day 9: ](./src/day_09/d09.jl) d09_p1(), d09_p2()
 * [Day 10: ](./src/day_10/d10.jl) d10_p1(), d10_p2()
 * [Day 11: ](./src/day_11/d11.jl) d11_p1(), d11_p2()
 * [Day 12: ](./src/day_12/d12.jl) d12_p1(), d12_p2()
