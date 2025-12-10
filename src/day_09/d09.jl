@@ -101,6 +101,7 @@ function classify_edges(corner_lst::Vector{Tuple{Int, Int}})
     v_edges, h_edges
 end
 
+# return a candidate list of rectangles in descending order by area
 function make_rectangles(corner_lst::Vector{Tuple{Int, Int}})
     rectangles = Vector{Tuple{Tuple{Int, Int}, Tuple{Int, Int}}}()
 
@@ -120,10 +121,13 @@ function is_valid_rectangle(
     v_edges::Vector{Tuple{Int, Tuple{Int, Int}}},
     h_edges::Vector{Tuple{Int, Tuple{Int, Int}}}
 )
+    # assume that p1 != p2, x1 <= x2 and y1 <= y2
+    #   p1: the top left corner of a rectangle
+    #   p2: the bottom right corner of a rectangle
+    @assert p1 != p2 "invalid coordinates"
     x1, y1 = p1
     x2, y2 = p2
 
-    # assume that p1 != p2, x1 <= x2 and y1 <= y2
     if x1 == x2
         # the area (x1, y1) - (x2, y2) is a vertical line
         for (e_x, (e_y1, e_y2)) in v_edges
@@ -143,14 +147,14 @@ function is_valid_rectangle(
 
         return false
     else
-        # the area (x1, y1) - (x2, y2) is a rectangle
+        # the area p1(x1, y1) - p2(x2, y2) is a rectangle
 
-        # check whether the point (x1 + 1, y1 + 1) is inside the loop
+        # 1)
+        # check whether the point (x1 + 1, y1 + 1) is inside the loop by ray casting
         #
-        #  p1(x1, y1)
-        #    #X...
-        #    X?
-        #    . (x1 + 1, y1 + 1)
+        #  p1--> *????
+        #        ?* <-- (x1 + 1, y1 + 1)
+        #        ?
         cnt = 0
         for (e_x, (e_y1, e_y2)) in v_edges
             if e_x < (x1 + 1) && (e_y1 <= (y1 + 1) < e_y2)
@@ -159,8 +163,11 @@ function is_valid_rectangle(
         end
         iseven(cnt) && return false
 
-        # check whether each edge of the loop doesn't cross the rectangle
-        # vertical edges
+        # 2)
+        # check whether each edge of the loop doesn't exist in the area (x1 + 1, y1 + 1) to
+        # (x2 - 1, y2 - 1) to verify that the area is filled by green tiles and inside a loop.
+        #
+        # a) vertical edges
         for (e_x, (e_y1, e_y2)) in v_edges
             if x1 < e_x < x2
                 if y1 < e_y2 && e_y1 < y2
@@ -169,7 +176,7 @@ function is_valid_rectangle(
             end
         end
 
-        # horizontal edges
+        # b) horizontal edges
         for (e_y, (e_x1, e_x2)) in h_edges
             if y1 < e_y < y2
                 if x1 < e_x2 && e_x1 < x2
@@ -177,6 +184,27 @@ function is_valid_rectangle(
                 end
             end
         end
+
+        # 3)
+        # now, there are two unfixed positions in the rectangle.
+        #
+        #    OOOO?         ...
+        # ...ggggO  or ...ggggO  ,and so on   [#: red tile, X/g: green tile (on the loop/inside the loop)]
+        #    ggggO        ggggO               [O: red/green tile, ?: unknow yet]]
+        #     ...         OOOO?
+        #
+        # if it assumes that a unfixed corner position '?' is blank space, neigther red tile nor
+        # green tile can't be placed at positions '@'. it becomes that both sides of X are blank
+        # spaces, it is contradictory.
+        #
+        #                   .X@           .X.
+        #    OOO#.        OOX#.@        OOX#..  [contradiction]
+        # ...gggg# --> ...gggg#X --> ...gggg#X
+        #    ggggO        ggggX.        ggggX.
+        #     ...          ...           ...
+        #
+        # in conclusion, a position '?' therefore must be a red or green tile.
+        # so the area (x1, y1) to (x2, y2) is a valid rectangle.
 
         return true
     end
