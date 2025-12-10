@@ -1,6 +1,63 @@
 
 module Day09
 
+#=
+Note that I assumed one more constraint to this problem.
+  - Parallel lines forming a loop must not be adjacent to each other
+
+BAD:
+.............
+.#XXX##XXXX#.
+.X...XX....X.
+.X.#X##XX#.X.
+.X.X.....X.X.
+.X.X.....X.X.
+.X.X.....X.X.
+.X #XXXXX#.X.
+.X.........X.
+.#XXXXXXXXX#.
+.............
+
+1,1
+5,1
+5,3
+3,3
+3,7
+9,7
+9,3
+6,3
+6,1
+11,1
+11,9
+1,9
+
+GOOD:
+.............
+.#XXX#.#XXX#.
+.X...X.X...X.
+.X.#X#.#X#.X.
+.X.X.....X.X.
+.X.X.....X.X.
+.X.X.....X.X.
+.X #XXXXX#.X.
+.X.........X.
+.#XXXXXXXXX#.
+.............
+
+1,1
+5,1
+5,3
+3,3
+3,7
+9,7
+9,3
+7,3
+7,1
+11,1
+11,9
+1,9
+=#
+
 function parse_file(fname::String)
     map(v -> Tuple(parse.(Int, v)), split.(readlines(joinpath(@__DIR__, fname)), !isnumeric))
 end
@@ -48,7 +105,9 @@ function make_rectangles(corner_lst::Vector{Tuple{Int, Int}})
     rectangles = Vector{Tuple{Tuple{Int, Int}, Tuple{Int, Int}}}()
 
     for i = 1:(length(corner_lst) - 1), j = (i + 1):length(corner_lst)
-        push!(rectangles, (corner_lst[i], corner_lst[j]))
+        x1, x2 = minmax(corner_lst[i][1], corner_lst[j][1])
+        y1, y2 = minmax(corner_lst[i][2], corner_lst[j][2])
+        push!(rectangles, ((x1, y1), (x2, y2)))
     end
     sort!(rectangles, by = (((x1, y1), (x2, y2)),) -> area(x1, y1, x2, y2), rev = true)
 
@@ -58,62 +117,78 @@ end
 function is_valid_rectangle(
     p1::Tuple{Int, Int},
     p2::Tuple{Int, Int},
-    corner_set::Set{Tuple{Int, Int}},
     v_edges::Vector{Tuple{Int, Tuple{Int, Int}}},
     h_edges::Vector{Tuple{Int, Tuple{Int, Int}}}
 )
     x1, y1 = p1
     x2, y2 = p2
 
-    # check wheter other two corners are red or green tiles
-    for (x, y) in ((x1, y2), (x2, y1))
-        # is (x, y) a red tile?
-        (x, y) in corner_set && continue
+    # assume that p1 != p2, x1 <= x2 and y1 <= y2
+    if x1 == x2
+        # the area (x1, y1) - (x2, y2) is a vertical line
+        for (e_x, (e_y1, e_y2)) in v_edges
+            if x1 == e_x
+                (y1 == e_y1 && y2 == e_y2) && return true
+            end
+        end
 
-        # is (x, y) a green tile?
+        return false
+    elseif y1 == y2
+        # the area (x1, y1) - (x2, y2) is a horizontal line
+        for (e_y, (e_x1, e_x2)) in h_edges
+            if y1 == e_y
+                (x1 == e_x1 && x2 == e_x2) && return true
+            end
+        end
+
+        return false
+    else
+        # the area (x1, y1) - (x2, y2) is a rectangle
+
+        # check whether the point (x1 + 1, y1 + 1) is inside the loop
+        #
+        #  p1(x1, y1)
+        #    #X...
+        #    X?
+        #    . (x1 + 1, y1 + 1)
         cnt = 0
         for (e_x, (e_y1, e_y2)) in v_edges
-            if e_x <= x && (e_y1 <= y < e_y2)
+            if e_x < (x1 + 1) && (e_y1 <= (y1 + 1) < e_y2)
                 cnt += 1
             end
         end
-
         iseven(cnt) && return false
-    end
 
-    # check whether each edge of the loop doesn't cross the rectangle
-    x_start, x_end = minmax(x1, x2)
-    y_start, y_end = minmax(y1, y2)
-
-    # vertical edges
-    for (e_x, (e_y1, e_y2)) in v_edges
-        if x_start < e_x < x_end
-            if y_start < e_y2 && e_y1 < y_end
-                return false
+        # check whether each edge of the loop doesn't cross the rectangle
+        # vertical edges
+        for (e_x, (e_y1, e_y2)) in v_edges
+            if x1 < e_x < x2
+                if y1 < e_y2 && e_y1 < y2
+                    return false
+                end
             end
         end
-    end
 
-    # horizontal edges
-    for (e_y, (e_x1, e_x2)) in h_edges
-        if y_start < e_y < y_end
-            if x_start < e_x2 && e_x1 < x_end
-                return false
+        # horizontal edges
+        for (e_y, (e_x1, e_x2)) in h_edges
+            if y1 < e_y < y2
+                if x1 < e_x2 && e_x1 < x2
+                    return false
+                end
             end
         end
-    end
 
-    true
+        return true
+    end
 end
 
 function d09_p2(fname::String = "input")
     corner_lst = parse_file(fname)
-    corner_set = Set(corner_lst)
     v_edges, h_edges = classify_edges(corner_lst)
     rectangles = make_rectangles(corner_lst)
 
     for (p1, p2) in rectangles
-        if is_valid_rectangle(p1, p2, corner_set, v_edges, h_edges)
+        if is_valid_rectangle(p1, p2, v_edges, h_edges)
             return area(p1..., p2...)
         end
     end
@@ -125,3 +200,90 @@ end #module
 
 using .Day09: d09_p1, d09_p2
 export d09_p1, d09_p2
+
+#=
+[Another test case #1]
+.............
+.........#X#.
+.........X.X.
+.........X.X.
+.........X.X.
+.........X.X.
+.........X.X.
+.........X.X.
+.........X.X.
+.........X.X.
+.........X.X.
+.#XXXXXXX#.X.
+.X.........X.
+.#XXXXXXXXX#.
+.............
+
+9,1
+11,1
+11,13
+1,13
+1,11
+9,11
+
+Part 1: 143
+Part 2: 39 ((9,1) - (11,13))
+
+
+[Another test case #2]
+.................
+.#XXXXXXXXX#.#X#.
+.X.........X.X.X.
+.X.........#X#.X.
+.X.............X.
+.X.............X.
+.X.............X.
+.X.............X.
+.X.............X.
+.X.............X.
+.X.............X.
+.#XXXXXXXXXXXXX#.
+.................
+
+1,1
+11,1
+11,3
+13,3
+13,1
+15,1
+15,11
+1,11
+
+Part 1: 165
+Part 2: 121 ((11,1) - (1,11))
+
+
+[Another test case #3]
+..............
+.#XXX#.#XXXX#.
+.X...X.X....X.
+.X.#X#.#X#..X.
+.X.X.....X..X.
+.X.X.....X..X.
+.X.X.....X..X.
+.X #XXXXX#..X.
+.X..........X.
+.#XXXXXXXXXX#.
+..............
+
+1,1
+5,1
+5,3
+3,3
+3,7
+9,7
+9,3
+7,3
+7,1
+12,1
+12,9
+1,9
+
+Part 1: 108
+Part 2: 30 ((3,7) - (12,9))
+=#
