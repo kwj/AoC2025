@@ -234,13 +234,7 @@ function is_valid_rectangle(
         #  p1--> *????
         #        ?* <-- (x1 + 1, y1 + 1)
         #        ?
-        cnt = 0
-        for (e_x, (e_y1, e_y2)) in v_edges
-            if e_x < (x1 + 1) && (e_y1 <= (y1 + 1) < e_y2)
-                cnt += 1
-            end
-        end
-        iseven(cnt) && return false
+        !is_inside(v_edges, y1 + 1, x1 + 1) && return false
 
         # 2)
         # check whether each edge of the loop doesn't exist in the area (x1 + 1, y1 + 1) to
