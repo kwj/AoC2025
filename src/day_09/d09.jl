@@ -97,6 +97,8 @@ function classify_edges(corner_lst::Vector{Tuple{Int, Int}})
             @assert false "invali input data"
         end
     end
+    sort!(v_edges, by = first)
+    sort!(h_edges, by = first)
 
     v_edges, h_edges
 end
@@ -115,6 +117,89 @@ function make_rectangles(corner_lst::Vector{Tuple{Int, Int}})
     rectangles
 end
 
+function remove_span(lst::Vector{Tuple{Int, Int}}, a1::Int, a2::Int)
+    Iterators.flatmap(lst) do (x1, x2)
+        if x1 <= a2 && a1 <= x2
+            # overlapped
+            if a1 <= x1
+                if a2 < x2
+                    [(a2 + 1, x2)]
+                else
+                    Tuple{Int, Int}[]
+                end
+            else
+                if a2 < x2
+                    [(x1, a1 - 1), (a2 + 1, x2)]
+                else
+                    [(x1, a1 - 1)]
+                end
+            end
+        else
+            [(x1, x2)]
+        end
+    end |> collect
+end
+
+function is_edge_crossed(k::Int, spans::Vector{Tuple{Int, Int}}, edges::Vector{Tuple{Int, Tuple{Int, Int}}})
+    exclusion = (spans[1][1], spans[end][end])
+
+    tpl, state = iterate(edges)
+    for (start, stop) in spans
+        while tpl[1] < start
+            iterate(edges, state) === nothing && return false
+            tpl, state = iterate(edges, state)
+        end
+
+        n, (e1, e2) = tpl
+        while n <= stop
+            (e1 < k < e2 && n ∉ exclusion) && return true
+
+            iterate(edges, state) === nothing && return false
+            (n, (e1, e2)), state = iterate(edges, state)
+        end
+    end
+
+    false
+end
+
+function is_inside(edges::Vector{Tuple{Int, Tuple{Int, Int}}}, x::Int, thr::Int)
+    cnt = 0
+    for (n, (e1, e2)) in edges
+        if n < thr && e1 <= x < e2
+            cnt += 1
+        end
+    end
+
+    isodd(cnt)
+end
+
+function check_line(
+    k::Int,
+    span_start::Int,
+    span_stop::Int,
+    parallel_edges::Vector{Tuple{Int, Tuple{Int, Int}}},
+    orthogonal_edges::Vector{Tuple{Int, Tuple{Int, Int}}}
+)
+    # remove all parallel edges from the line
+    spans = [(span_start, span_stop)]
+    for (n, (e1, e2)) in parallel_edges
+        n != k && continue
+
+        spans = remove_span(spans, e1, e2)
+        isempty(spans) && return true
+    end
+
+    # if any orthogonal edge intersects with the remaing spans, it's not a valid rectangle
+    is_edge_crossed(k, spans, orthogonal_edges) && return false
+
+    # check whether all remaing spans are inside the loop
+    for (start, _) in spans
+        !is_inside(parallel_edges, start, k) && return false
+    end
+
+    return true
+end
+
 function is_valid_rectangle(
     p1::Tuple{Int, Int},
     p2::Tuple{Int, Int},
@@ -130,24 +215,16 @@ function is_valid_rectangle(
 
     if x1 == x2
         # the area (x1, y1) - (x2, y2) is a vertical line
-        for (e_x, (e_y1, e_y2)) in v_edges
-            if x1 == e_x
-                (y1 == e_y1 && y2 == e_y2) && return true
-            end
-        end
-
-        return false
+        return check_line(x1, y1, y2, v_edges, h_edges)
     elseif y1 == y2
         # the area (x1, y1) - (x2, y2) is a horizontal line
-        for (e_y, (e_x1, e_x2)) in h_edges
-            if y1 == e_y
-                (x1 == e_x1 && x2 == e_x2) && return true
-            end
-        end
-
-        return false
+        return check_line(y1, x1, x2, h_edges, v_edges)
+    elseif x1 + 1 == x2
+        return check_line(x1, y1, y2, v_edges, h_edges) && check_line(x1 + 1, y1, y2, v_edges, h_edges)
+    elseif y1 + 1 == y2
+        return check_line(y1, x1, x2, h_edges, v_edges) && check_line(y1 + 1, x1, x2, h_edges, v_edges)
     else
-        # the area p1(x1, y1) - p2(x2, y2) is a rectangle
+        # the area p1(x1, y1) - p2(x2, y2) is a rectangle which lenth of edges is larger than or equal to 3
 
         # 1)
         # check whether the point (x1 + 1, y1 + 1) is inside the loop by ray casting
@@ -314,4 +391,34 @@ Part 2: 121 ((11,1) - (1,11))
 
 Part 1: 108
 Part 2: 30 ((3,7) - (12,9))
+
+
+[Another test case #4]
+.......................
+...#X#...........#X#...
+...X.X...........X.X...
+.#X#.#XXXXXXXXXXX#.X...
+.X.................#X#.
+.#XXXXXXXXXXXXXX#....X.
+................X....X.
+................#XXXX#.
+.......................
+
+1,3
+3,3
+3,1
+5,1
+5,3
+17,3
+17,1
+19,1
+19,4
+21,4
+21,7
+16,7
+16,5
+1,5
+
+Part 1: 133
+Part 2: 51 ((17,3) - (1,5))
 =#
