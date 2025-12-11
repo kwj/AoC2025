@@ -222,9 +222,9 @@ function is_valid_rectangle(
         # the area (x1, y1) - (x2, y2) is a horizontal line
         return check_line(y1, x1, x2, h_edges, v_edges)
     elseif x1 + 1 == x2
-        return check_line(x1, y1, y2, v_edges, h_edges) && check_line(x1 + 1, y1, y2, v_edges, h_edges)
+        return all(x -> check_line(x, y1, y2, v_edges, h_edges), (x1, x2))
     elseif y1 + 1 == y2
-        return check_line(y1, x1, x2, h_edges, v_edges) && check_line(y1 + 1, x1, x2, h_edges, v_edges)
+        return all(y -> check_line(y, x1, x2, h_edges, v_edges), (y1, y2))
     else
         # the area p1(x1, y1) - p2(x2, y2) is a rectangle which lenth of edges is larger than or equal to 3
 
