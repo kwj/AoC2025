@@ -61,10 +61,13 @@ GOOD:
 const Edge = Tuple{Int, Tuple{Int, Int}}
 
 function parse_file(fname::String)
-    map(v -> Tuple(parse.(Int, v)), split.(readlines(joinpath(@__DIR__, fname)), !isnumeric))
+    # note that coordinate values ​​are scaled by a factor of 2.
+    # the reason is to make it easier to deal with a rectangle whose side length is 2.
+    map(v -> Tuple(parse.(Int, v) .* 2), split.(readlines(joinpath(@__DIR__, fname)), !isnumeric))
 end
 
-area(x1::Int, y1::Int, x2::Int, y2::Int) = (abs(x1 - x2) + 1) * (abs(y1 - y2) + 1)
+# for a straight line, specify factor 2.
+area(x1::Int, y1::Int, x2::Int, y2::Int; factor::Int = 4) = div((abs(x1 - x2) + 2) * (abs(y1 - y2) + 2), factor)
 
 function d09_p1(fname::String = "input")
     corner_lst = parse_file(fname)  # red tiles
@@ -221,12 +224,8 @@ function is_valid_rectangle(
     elseif y1 == y2
         # the area (x1, y1) - (x2, y2) is a horizontal line
         return check_line(y1, x1, x2, h_edges, v_edges)
-    elseif x1 + 1 == x2
-        return all(x -> check_line(x, y1, y2, v_edges, h_edges), (x1, x2))
-    elseif y1 + 1 == y2
-        return all(y -> check_line(y, x1, x2, h_edges, v_edges), (y1, y2))
     else
-        # the area p1(x1, y1) - p2(x2, y2) is a rectangle which lenth of edges is larger than or equal to 3
+        # the area p1(x1, y1) - p2(x2, y2) is a rectangle (lentgh of edges are larger than or equal to 2)
 
         # 1)
         # check whether the point (x1 + 1, y1 + 1) is inside the loop by ray casting
@@ -290,7 +289,13 @@ function d09_p2(fname::String = "input")
 
     for (p1, p2) in rectangles
         if is_valid_rectangle(p1, p2, v_edges, h_edges)
-            return area(p1..., p2...)
+            if p1[1] == p2[1] || p1[2] == p2[2]
+                # straight line
+                return area(p1..., p2..., factor = 2)
+            else
+                # rectangle
+                return area(p1..., p2...)
+            end
         end
     end
 
