@@ -58,6 +58,8 @@ GOOD:
 1,9
 =#
 
+const Edge = Tuple{Int, Tuple{Int, Int}}
+
 function parse_file(fname::String)
     map(v -> Tuple(parse.(Int, v)), split.(readlines(joinpath(@__DIR__, fname)), !isnumeric))
 end
@@ -78,8 +80,8 @@ function d09_p1(fname::String = "input")
 end
 
 function classify_edges(corner_lst::Vector{Tuple{Int, Int}})
-    v_edges = Vector{Tuple{Int, Tuple{Int, Int}}}()
-    h_edges = Vector{Tuple{Int, Tuple{Int, Int}}}()
+    v_edges = Vector{Edge}()
+    h_edges = Vector{Edge}()
     sizehint!(v_edges, div(length(corner_lst), 2))
     sizehint!(h_edges, div(length(corner_lst), 2))
 
@@ -140,7 +142,7 @@ function remove_span(lst::Vector{Tuple{Int, Int}}, a1::Int, a2::Int)
     end |> collect
 end
 
-function is_edge_crossed(k::Int, spans::Vector{Tuple{Int, Int}}, edges::Vector{Tuple{Int, Tuple{Int, Int}}})
+function is_edge_crossed(k::Int, spans::Vector{Tuple{Int, Int}}, edges::Vector{Edge})
     exclusion = (spans[1][1], spans[end][end])
 
     tpl, state = iterate(edges)
@@ -162,7 +164,7 @@ function is_edge_crossed(k::Int, spans::Vector{Tuple{Int, Int}}, edges::Vector{T
     false
 end
 
-function is_inside(edges::Vector{Tuple{Int, Tuple{Int, Int}}}, x::Int, thr::Int)
+function is_inside(edges::Vector{Edge}, x::Int, thr::Int)
     cnt = 0
     for (n, (e1, e2)) in edges
         if n < thr && e1 <= x < e2
@@ -177,8 +179,8 @@ function check_line(
     k::Int,
     span_start::Int,
     span_stop::Int,
-    parallel_edges::Vector{Tuple{Int, Tuple{Int, Int}}},
-    orthogonal_edges::Vector{Tuple{Int, Tuple{Int, Int}}}
+    parallel_edges::Vector{Edge},
+    orthogonal_edges::Vector{Edge}
 )
     # remove all parallel edges from the line
     spans = [(span_start, span_stop)]
@@ -203,8 +205,8 @@ end
 function is_valid_rectangle(
     p1::Tuple{Int, Int},
     p2::Tuple{Int, Int},
-    v_edges::Vector{Tuple{Int, Tuple{Int, Int}}},
-    h_edges::Vector{Tuple{Int, Tuple{Int, Int}}}
+    v_edges::Vector{Edge},
+    h_edges::Vector{Edge}
 )
     # assume that p1 != p2, x1 <= x2 and y1 <= y2
     #   p1: the top left corner of a rectangle
