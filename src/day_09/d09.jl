@@ -3,7 +3,7 @@ module Day09
 
 #=
 Note that I assumed one more constraint to this problem.
-  - Parallel lines forming a loop must not be adjacent to each other
+  - The line of the loop does not contact or intersect with other lines
 
 BAD:
 .............
