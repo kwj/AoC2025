@@ -145,7 +145,7 @@ function remove_span(lst::Vector{Tuple{Int, Int}}, a1::Int, a2::Int)
     end |> collect
 end
 
-function is_edge_crossed(k::Int, spans::Vector{Tuple{Int, Int}}, edges::Vector{Edge})
+function is_edge_intersected(k::Int, spans::Vector{Tuple{Int, Int}}, edges::Vector{Edge})
     exclusion = (spans[1][1], spans[end][end])
 
     tpl, state = iterate(edges)
@@ -195,7 +195,7 @@ function check_line(
     end
 
     # if any orthogonal edge intersects with the remaing spans, it's not a valid rectangle
-    is_edge_crossed(k, spans, orthogonal_edges) && return false
+    is_edge_intersected(k, spans, orthogonal_edges) && return false
 
     # check whether all remaing spans are inside the loop
     for (start, _) in spans
