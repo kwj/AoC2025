@@ -225,7 +225,8 @@ function is_valid_rectangle(
         # the area (x1, y1) - (x2, y2) is a horizontal line
         return check_line(y1, x1, x2, h_edges, v_edges)
     else
-        # the area p1(x1, y1) - p2(x2, y2) is a rectangle (lentgh of edges are larger than or equal to 2)
+        # the area p1(x1, y1) - p2(x2, y2) is a rectangle
+        # the original lengthes of rectangle are larger than or equal to 2
 
         # 1)
         # check whether the point (x1 + 1, y1 + 1) is inside the loop by ray casting
@@ -233,7 +234,7 @@ function is_valid_rectangle(
         #  p1--> *????
         #        ?* <-- (x1 + 1, y1 + 1)
         #        ?
-        !is_inside(v_edges, y1 + 1, x1 + 1) && return false
+        !is_inside(h_edges, x1 + 1, y1 + 1) && return false
 
         # 2)
         # check whether each edge of the loop doesn't exist in the area (x1 + 1, y1 + 1) to
