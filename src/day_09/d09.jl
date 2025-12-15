@@ -99,7 +99,7 @@ function classify_edges(corner_lst::Vector{Tuple{Int, Int}})
             # horizontal edge: (y, (x_start, x_end))
             push!(h_edges, (y1, minmax(x1, x2)))
         else
-            @assert false "invali input data"
+            @assert false "invalid input data"
         end
     end
     sort!(v_edges, by = first)
@@ -185,7 +185,7 @@ function check_line(
     parallel_edges::Vector{Edge},
     orthogonal_edges::Vector{Edge}
 )
-    # remove all parallel edges from the line
+    # remove all edges from the line
     spans = [(span_start, span_stop)]
     for (n, (e1, e2)) in parallel_edges
         n != k && continue
@@ -258,12 +258,11 @@ function is_valid_rectangle(
             end
         end
 
-        # 3)
         # now, there are two unfixed positions in the rectangle.
         #
         #    OOOO?         ...
-        # ...ggggO  or ...ggggO  ,and so on   [#: red tile, X/g: green tile (on the loop/inside the loop)]
-        #    ggggO        ggggO               [O: red/green tile, ?: unknow yet]]
+        # ...ggggO  or ...ggggO  , and so on   [#: red tile, X/g: green tile (on the loop/inside the loop)]
+        #    ggggO        ggggO                [O: red/green tile, ?: unknow yet]]
         #     ...         OOOO?
         #
         # if it assumes that a unfixed corner position '?' is blank space, neigther red tile nor
@@ -286,9 +285,8 @@ end
 function d09_p2(fname::String = "input")
     corner_lst = parse_file(fname)
     v_edges, h_edges = classify_edges(corner_lst)
-    rectangles = make_rectangles(corner_lst)
 
-    for (p1, p2) in rectangles
+    for (p1, p2) in make_rectangles(corner_lst)
         if is_valid_rectangle(p1, p2, v_edges, h_edges)
             if p1[1] == p2[1] || p1[2] == p2[2]
                 # straight line
