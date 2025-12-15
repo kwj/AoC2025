@@ -15,15 +15,9 @@ end
 
 function d11_p1(fname::String = "input")
     function aux(d::String, memo::Dict{String, Int}, devs::Dict{String, Vector{String}})
-        if !haskey(memo, d)
-            if d == "out"
-                memo[d] = 1
-            else
-                memo[d] = sum(next_d -> aux(next_d, memo, devs), devs[d])
-            end
+        get!(memo, d) do
+            d == "out" ? 1 : sum(next_d -> aux(next_d, memo, devs), devs[d])
         end
-
-        memo[d]
     end
 
     dev_info = parse_file(fname)
@@ -42,9 +36,9 @@ State(x::State; dev_name = x.dev_name, dac = x.dac, fft = x.fft) = State(dev_nam
 
 function d11_p2(fname::String = "input")
     function aux(st::State, memo::Dict{State, Int}, devs::Dict{String, Vector{String}})
-        if !haskey(memo, st)
+        get!(memo, st) do
             if st.dev_name == "out"
-                memo[st] = (st.dac && st.fft) ? 1 : 0
+                (st.dac && st.fft) ? 1 : 0
             else
                 if st.dev_name == "dac"
                     st = State(st, dac = true)
@@ -52,13 +46,11 @@ function d11_p2(fname::String = "input")
                     st = State(st, fft = true)
                 end
 
-                memo[st] = sum(devs[st.dev_name]) do next_d
+                sum(devs[st.dev_name]) do next_d
                     aux(State(st, dev_name = next_d), memo, devs)
                 end
             end
         end
-
-        memo[st]
     end
 
     dev_info = parse_file(fname)
