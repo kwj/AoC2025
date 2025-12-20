@@ -10,12 +10,7 @@ function parse_file(fname::String)
 end
 
 function num_adj_rolls(grid::Matrix{Int}, pos::CIdx{2})
-    acc = 0
-    for delta in NBRS
-        acc += get(grid, pos + delta, 0)
-    end
-
-    acc
+    sum(delta -> get(grid, pos + delta, 0), NBRS)
 end
 
 function find_rolls_to_remove(grid::Matrix{Int}, thr::Int)
