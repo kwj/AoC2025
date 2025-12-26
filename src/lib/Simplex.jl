@@ -5,7 +5,7 @@ const EPS = 1.0e-9
 
 # Integer Linear Programming (ILP) using simplex method and branch-and-bound
 function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}, int_flags::AbstractVector{Bool})::Union{Nothing, Vector{Float64}}
-    @assert length(int_flags) == size(A, 2) ""
+    @assert length(int_flags) == size(A, 2) "the size of the coefficient matrix doesn't match the length of the integer constraint vector"
 
     function find_non_int_val(xs::Vector{Float64}, int_flags)::Union{Nothing, Tuple{Int, Float64}}
         for (idx, flag) in pairs(int_flags)
@@ -86,7 +86,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
         # if there is no solution, return nothing
         !isapprox(z[end], 0.0, atol = EPS) && return nothing
 
-        # if artificial variables exist in basic variables, remove them from basic variables
+        # if artificial variables exist among the basic variables, remove them from the basic variables if possible
         for r_idx in findall(>=(a_start), b_vars)
             all(in(b_vars), 1:(n_x + n_s)) && break
 
@@ -101,7 +101,6 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
 
             factor = z[c_idx] / tbl[r_idx, c_idx]
             z .-= factor .* @view tbl[r_idx, :]
-
             for r in axes(tbl, 1)
                 r == r_idx && continue
                 factor = tbl[r, c_idx] / tbl[r_idx, c_idx]
@@ -161,17 +160,17 @@ end
 # [OUT]
 # tbl: initial coeeficient table (except Z)
 # Z: initial coeeficient of objective function
-# b_vars: initial basic
-# a_var_idxes: indexes of rows which have an artificial value
+# b_vars: column indexes of initial basic variables
+# a_var_idxes: row indexes which have an artificial value
 # tpl: # of columns (length(x), # of slack/surplus variables, # of artificial variables)
 function prepare_tableau(A, b, c, goal, relations)
     m, n = size(A)
 
-    @assert m == length(b) "coefficient matrix and RHS vector don't match"
-    @assert m == length(relations) "coefficient matrix and relations don't match"
-    @assert n == length(c) "coefficient matrix and coefficient vector don't match"
-    @assert goal ∈ (:maximize, :minimize) "goal must be either :maximize or :minimize"
-    @assert all(in((:le, :eq, :ge)), relations) "invalid relation is found"
+    @assert m == length(b) "the size of coefficient matrix (LHS) doesn't match the length of the coefficient vector (RHS)"
+    @assert m == length(relations) "the size of coefficient matrix doesn't match the length of the relations vector"
+    @assert n == length(c) "the size of coefficient matrix doesn't match the length of the objective function vector"
+    @assert goal ∈ (:maximize, :minimize) "the goal argument must be either :maximize or :minimize"
+    @assert all(in((:le, :eq, :ge)), relations) "invalid relationship symbol is found"
 
     A1 = map(Float64, A)
     b′ = map(Float64, b)
@@ -189,7 +188,7 @@ function prepare_tableau(A, b, c, goal, relations)
     A2a = Vector{Float64}[]  # artifiicial variables
     m, n = size(A1)
     a_var_idxes = Int[]  # row indexes which have artificial variable
-    b_vars = Int[]  # initial basic variables
+    b_vars = Int[]  # column indexes of initial basic variables
     idx = n + 1
     for (i, sym) in pairs(relations′)
         if sym != :eq
