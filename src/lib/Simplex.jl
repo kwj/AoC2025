@@ -88,14 +88,8 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
 
         # if artificial variables exist among the basic variables, remove them from the basic variables if possible
         for r_idx in findall(>=(a_start), b_vars)
-            all(in(b_vars), 1:(n_x + n_s)) && break
-
-            c_idx = 1
-            while c_idx < a_start
-                !isapprox(tbl[r_idx, c_idx], 0.0, atol = EPS) && break
-                c_idx += 1
-            end
-            c_idx == a_start && break
+            c_idx = findfirst(x -> !isapprox(x, 0.0, atol = EPS), @view tbl[r_idx, 1:(n_x + n_s)])
+            isnothing(c_idx) && continue
 
             tbl[r_idx, :] ./= tbl[r_idx, c_idx]
 
