@@ -76,15 +76,15 @@ function d10_p2(fname::String = "input")
     _, buttons_lst, joltages = parse_file(fname)
 
     acc = 0
-    for (btns, b) in zip(buttons_lst, joltages)
+    for (idx, (btns, b)) in Iterators.enumerate(zip(buttons_lst, joltages))
         A = hcat(btns...)
         c = ones(Int, size(A, 2))
         relations = fill(:eq, size(A, 1))
         ints_flag = trues(size(A, 2))
 
         xs = simplex_method(A, b, c, :minimize, relations, ints_flag)
+        @assert !isnothing(xs) "There was no integer solutions for the problem on line $idx"
 
-        @assert !isnothing(xs) "error"
         acc += sum(round.(Int, xs))
     end
 
