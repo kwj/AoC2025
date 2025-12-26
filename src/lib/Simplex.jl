@@ -18,9 +18,9 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
         return nothing
     end
 
-    A′ = map(float, A)
-    b′ = map(float, b)
-    c′ = map(float, c)
+    A′ = map(Float64, A)
+    b′ = map(Float64, b)
+    c′ = map(Float64, c)
 
     # branch-and-bound
     thr = (goal == :maximize) ? -Inf : Inf
@@ -173,14 +173,15 @@ function prepare_tableau(A, b, c, goal, relations)
     @assert goal ∈ (:maximize, :minimize) "goal must be either :maximize or :minimize"
     @assert all(in((:le, :eq, :ge)), relations) "invalid relation is found"
 
-    A1 = map(float, A)
-    b′ = map(float, b)
+    A1 = map(Float64, A)
+    b′ = map(Float64, b)
+    relations′ = copy(relations)
 
     for i in findall(signbit, b′)
         map!(x -> -x, @view A1[i, :])
         b′[i] = -b′[i]
-        if relations[i] != :eq
-            relations[i] = (relations[i] == :le) ? :ge : le
+        if relations′[i] != :eq
+            relations′[i] = (relations′[i] == :le) ? :ge : le
         end
     end
 
@@ -190,7 +191,7 @@ function prepare_tableau(A, b, c, goal, relations)
     a_var_idxes = Int[]  # row indexes which have artificial variable
     b_vars = Int[]  # initial basic variables
     idx = n + 1
-    for (i, sym) in pairs(relations)
+    for (i, sym) in pairs(relations′)
         if sym != :eq
             s = zeros(Float64, m)
             if sym == :le
