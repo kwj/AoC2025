@@ -1,0 +1,91 @@
+# Note: This is a template file.
+
+# Test cases for given inputs on Advent of Code 2025
+#
+# I placed the files as `input` in each folder, because each program uses
+# the default input file name as `input`.
+#
+# However, the following examples explicitly specify file names for clarity.
+
+@testset verbose = true "Advent of Code 2025 (my given input data)" begin
+    @testset "Day 1 / Part 1" begin
+        @test d01_p1("input") == 0
+    end
+    @testset "Day 1 / Part 2" begin
+        @test d01_p2("input") == 0
+    end
+
+    @testset "Day 2 / Part 1" begin
+        @test d02_p1("input") == 0
+    end
+    @testset "Day 2 / Part 2" begin
+        @test d02_p2("input") == 0
+    end
+
+    @testset "Day 3 / Part 1" begin
+        @test d03_p1("input") == 0
+    end
+    @testset "Day 3 / Part 2" begin
+        @test d03_p2("input") == 0
+    end
+
+    @testset "Day 4 / Part 1" begin
+        @test d04_p1("input") == 0
+    end
+    @testset "Day 4 / Part 2" begin
+        @test d04_p2("input") == 0
+    end
+
+    @testset "Day 5 / Part 1" begin
+        @test d05_p1("input") == 0
+    end
+    @testset "Day 5 / Part 2" begin
+        @test d05_p2("input") == 0
+    end
+
+    @testset "Day 6 / Part 1" begin
+        @test d06_p1("input") == 0
+    end
+    @testset "Day 6 / Part 2" begin
+        @test d06_p2("input") == 0
+    end
+
+    @testset "Day 7 / Part 1" begin
+        @test d07_p1("input") == 0
+    end
+    @testset "Day 7 / Part 2" begin
+        @test d07_p2("input") == 0
+    end
+
+    @testset "Day 8 / Part 1" begin
+        @test d08_p1("input") == 0
+    end
+    @testset "Day 8 / Part 2" begin
+        @test d08_p2("input") == 0
+    end
+
+    @testset "Day 9 / Part 1" begin
+        @test d09_p1("input") == 0
+    end
+    @testset "Day 9 / Part 2" begin
+        @test d09_p2("input") == 0
+    end
+
+    @testset "Day 10 / Part 1" begin
+        @test d10_p1("input") == 0
+    end
+    @testset "Day 10 / Part 2" begin
+        @test d10_p2("input") == 0
+    end
+
+    @testset "Day 11 / Part 1" begin
+        @test d11_p1("input") == 0
+    end
+    @testset "Day 11 / Part 2" begin
+        @test d11_p2("input") == 0
+    end
+
+    @testset "Day 12 / Part 1" begin
+        @test d12_p1("input") == 0
+    end
+end

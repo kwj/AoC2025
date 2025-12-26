@@ -6,7 +6,7 @@ URL: https://adventofcode.com/2025
 
 I used the Julia programming language.
 
-* [Julia](https://julialang.org/) (confirmed to work with Julia v1.12.2)
+* [Julia](https://julialang.org/) (confirmed to work with Julia v1.12.3)
 
 ## Solutions
 
@@ -50,7 +50,7 @@ $ sh solve.sh
   (_)     | (_) (_)    |
    _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
   | | | | | | |/ _` |  |
-  | | |_| | | | (_| |  |  Version 1.12.2 (2025-11-20)
+  | | |_| | | | (_| |  |  Version 1.12.3 (2025-12-15)
  _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org release
 |__/                   |
 
