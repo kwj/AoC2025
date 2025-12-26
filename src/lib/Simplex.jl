@@ -4,10 +4,10 @@ module Simplex
 const EPS = 1.0e-9
 
 # Integer Linear Programming by Simplex method (ILP)
-function simplex_method(A, b, c, goal::Symbol, relations::Vector{Symbol}, int_flags)::Union{Nothing, Vector{Float64}}
+function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}, int_flags::AbstractVector{Bool})::Union{Nothing, Vector{Float64}}
     @assert length(int_flags) == size(A, 2) ""
 
-    function check_int_val(xs::Vector{Float64}, int_flags::Vector{Bool})::Union{Nothing, Tuple{Int, Float64}}
+    function check_int_val(xs::Vector{Float64}, int_flags)::Union{Nothing, Tuple{Int, Float64}}
         for (idx, flag) in pairs(int_flags)
             flag == false && continue
             isapprox(xs[idx], round(xs[idx], RoundNearest), atol = EPS) && continue
@@ -25,7 +25,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::Vector{Symbol}, int_fl
     # branch-and-bound
     thr = (goal == :maximize) ? -Inf : Inf
     result = Float64[]
-    q = Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}, Symbol, Vector{Symbol}}[]
+    q = Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}, Symbol, typeof(relations)}[]
     push!(q, (A′, b′, c′, goal, relations))
 
     while !isempty(q)
@@ -64,7 +64,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::Vector{Symbol}, int_fl
 end
 
 # Simplex algorithm (linear programming)
-function simplex_method(A, b, c, goal::Symbol, relations::Vector{Symbol})::Union{Nothing, Vector{Float64}}
+function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol})::Union{Nothing, Vector{Float64}}
     tbl, Z, b_vars, a_var_idxes, (n_x, n_s, n_a)  = prepare_tableau(A, b, c, goal, relations)
 
     if !iszero(n_a)
