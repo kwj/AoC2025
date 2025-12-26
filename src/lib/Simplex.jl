@@ -3,7 +3,7 @@ module Simplex
 
 const EPS = 1.0e-9
 
-# Integer Linear Programming by Simplex method (ILP)
+# Integer Linear Programming (ILP) using simplex method and branch-and-bound
 function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}, int_flags::AbstractVector{Bool})::Union{Nothing, Vector{Float64}}
     @assert length(int_flags) == size(A, 2) ""
 
@@ -63,7 +63,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
     end
 end
 
-# Simplex algorithm (linear programming)
+# Linear Programming (LP) using simplex method
 function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol})::Union{Nothing, Vector{Float64}}
     tbl, Z, b_vars, a_var_idxes, (n_x, n_s, n_a)  = prepare_tableau(A, b, c, goal, relations)
 
