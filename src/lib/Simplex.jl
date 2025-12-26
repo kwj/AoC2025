@@ -1,0 +1,224 @@
+
+module Simplex
+
+const EPS = 1.0e-9
+
+# Integer Linear Programming by Simplex method (ILP)
+function simplex_method(A, b, c, goal::Symbol, relations::Vector{Symbol}, int_flags)::Union{Nothing, Vector{Float64}}
+    @assert length(int_flags) == size(A, 2) ""
+
+    function check_int_val(xs::Vector{Float64}, int_flags::Vector{Bool})::Union{Nothing, Tuple{Int, Float64}}
+        for (idx, flag) in pairs(int_flags)
+            flag == false && continue
+            isapprox(xs[idx], round(xs[idx], RoundNearest), atol = EPS) && continue
+
+            return (idx, xs[idx])
+        end
+
+        return nothing
+    end
+
+    A′ = map(float, A)
+    b′ = map(float, b)
+    c′ = map(float, c)
+
+    # branch-and-bound
+    thr = (goal == :maximize) ? -Inf : Inf
+    result = Float64[]
+    q = Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}, Symbol, Vector{Symbol}}[]
+    push!(q, (A′, b′, c′, goal, relations))
+
+    while !isempty(q)
+        frm = pop!(q)
+        xs = simplex_method(frm...)
+        isnothing(xs) && continue
+
+        val = sum(tpl -> tpl[1] * tpl[2], zip(c′, xs))
+        (goal == :maximize ? val < thr : val > thr) && continue
+
+        if (tpl = check_int_val(xs, int_flags); isnothing(tpl))
+            thr = val
+            result = xs
+        else
+            coeff = zeros(Float64, size(A, 2))
+            coeff[tpl[1]] = 1.0
+
+            low = round(tpl[2], RoundDown)
+            push!(q, (vcat(frm[1], transpose(coeff)), vcat(frm[2], low), c′, goal, vcat(frm[5], :le)))
+
+            high = round(tpl[2], RoundUp)
+            push!(q, (vcat(frm[1], transpose(coeff)), vcat(frm[2], high), c′, goal, vcat(frm[5], :ge)))
+        end
+    end
+
+    if isempty(result)
+        nothing
+    else
+        foreach(pairs(int_flags)) do (idx, flag)
+            if flag == true
+                result[idx] = round(result[idx])
+            end
+        end
+        result
+    end
+end
+
+# Simplex algorithm (linear programming)
+function simplex_method(A, b, c, goal::Symbol, relations::Vector{Symbol})::Union{Nothing, Vector{Float64}}
+    tbl, Z, b_vars, a_var_idxes, (n_x, n_s, n_a)  = prepare_tableau(A, b, c, goal, relations)
+
+    if !iszero(n_a)
+        # phase 1
+
+        # start/end indexes of artificial variables
+        a_start, a_end = n_x + n_s + 1, n_x + n_s + n_a
+
+        # z: objective function for phase 1
+        z = zeros(Float64, length(Z))
+        z[a_start:a_end] .= 1.0
+
+        for row in a_var_idxes
+            z .-= @view tbl[row, :]
+        end
+
+        standard_simplex!(tbl, b_vars, z)
+
+        # if there is no solution, return nothing
+        !isapprox(z[end], 0.0, atol = EPS) && return nothing
+
+        # if artificial variables exist in basic variables, remove them from basic variables
+        for r_idx in findall(>=(a_start), b_vars)
+            all(in(b_vars), 1:(n_x + n_s)) && break
+
+            c_idx = 1
+            while c_idx < a_start
+                !isapprox(tbl[r_idx, c_idx], 0.0, atol = EPS) && break
+                c_idx += 1
+            end
+            c_idx == a_start && break
+
+            tbl[r_idx, :] ./= tbl[r_idx, c_idx]
+
+            factor = z[c_idx] / tbl[r_idx, c_idx]
+            z .-= factor .* @view tbl[r_idx, :]
+
+            for r in axes(tbl, 1)
+                r == r_idx && continue
+                factor = tbl[r, c_idx] / tbl[r_idx, c_idx]
+                tbl[r, :] .-= factor * @view tbl[r_idx, :]
+            end
+
+            b_vars[r_idx] = c_idx
+        end
+
+        deleteat!(Z, a_start:a_end)
+        tbl = tbl[:, setdiff(axes(tbl, 2), a_start:a_end)]
+
+        for row in findall(<=(n_x), b_vars)
+            x = b_vars[row]
+            factor = Z[x] / tbl[row, x]
+            Z .-= factor .* @view tbl[row, :]
+        end
+    end
+
+    standard_simplex!(tbl, b_vars, Z)
+
+    result = zeros(Float64, n_x)
+    for (idx, x) in pairs(b_vars)
+        x > n_x && continue
+        result[x] = tbl[idx, end]
+    end
+
+    result
+end
+
+function standard_simplex!(tbl, b_vars, z)
+    while ((x, c_idx) = findmin(@view z[begin:end - 1]); x < -EPS)
+        (_, r_idx) = findmin(i -> tbl[i, c_idx] > 0 ? tbl[i, end] / tbl[i, c_idx] : Inf, axes(tbl, 1))
+
+        tbl[r_idx, :] ./= tbl[r_idx, c_idx]
+        factor = z[c_idx] / tbl[r_idx, c_idx]
+        z .-= factor .* @view tbl[r_idx, :]
+        for r in axes(tbl, 1)
+            r == r_idx && continue
+            factor = tbl[r, c_idx] / tbl[r_idx, c_idx]
+            tbl[r, :] .-= factor * tbl[r_idx, :]
+        end
+
+        b_vars[r_idx] = c_idx
+    end
+
+    tbl, b_vars, z
+end
+
+# [IN]
+# A: coefficient (constraint function) LHS / matrix
+# b: coefficient (constraint function) RHS / vector
+# c: coefficient (objective function) / vector
+# goal: objective / :maximize or :minimize
+# relations: relationship symbol (:le, :eq, :ge) / vector
+#
+# [OUT]
+# tbl: initial coeeficient table (except Z)
+# Z: initial coeeficient of objective function
+# b_vars: initial basic
+# a_var_idxes: indexes of rows which have an artificial value
+# tpl: # of columns (length(x), # of slack/surplus variables, # of artificial variables)
+function prepare_tableau(A, b, c, goal, relations)
+    m, n = size(A)
+
+    @assert m == length(b) "coefficient matrix and RHS vector don't match"
+    @assert m == length(relations) "coefficient matrix and relations don't match"
+    @assert n == length(c) "coefficient matrix and coefficient vector don't match"
+    @assert goal ∈ (:maximize, :minimize) "goal must be either :maximize or :minimize"
+    @assert all(in((:le, :eq, :ge)), relations) "invalid relation is found"
+
+    A1 = map(float, A)
+    b′ = map(float, b)
+
+    for i in findall(signbit, b′)
+        map!(x -> -x, @view A1[i, :])
+        b′[i] = -b′[i]
+        if relations[i] != :eq
+            relations[i] = (relations[i] == :le) ? :ge : le
+        end
+    end
+
+    A2s = Vector{Float64}[]  # slack/surplus variables
+    A2a = Vector{Float64}[]  # artifiicial variables
+    m, n = size(A1)
+    a_var_idxes = Int[]  # row indexes which have artificial variable
+    b_vars = Int[]  # initial basic variables
+    idx = n + 1
+    for (i, sym) in pairs(relations)
+        if sym != :eq
+            s = zeros(Float64, m)
+            if sym == :le
+                s[i] = 1.0
+                push!(b_vars, idx)
+            else
+                s[i] = -1.0
+            end
+            push!(A2s, s)
+            idx += 1
+        end
+
+        if sym != :le
+            s = zeros(Float64, m)
+            s[i] = 1.0
+            push!(A2a, s)
+            push!(a_var_idxes, i)
+        end
+    end
+
+    Z = zeros(Float64, n + length(A2s) + length(A2a) + 1)
+    for (i, x) in pairs(c)
+        Z[i] = (goal == :minimize) ? float(x) : -float(x)
+    end
+
+    b_vars = vcat(b_vars, (n + length(A2s) + 1):(length(Z) - 1))
+
+    hcat(A1, A2s..., A2a..., b′), Z, b_vars, a_var_idxes, (n, length(A2s), length(A2a))
+end
+
+end #module
