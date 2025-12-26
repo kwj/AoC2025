@@ -78,9 +78,9 @@ function d10_p2(fname::String = "input")
     acc = 0
     for (btns, b) in zip(buttons_lst, joltages)
         A = hcat(btns...)
-        c = fill(1, size(A, 2))
+        c = ones(Int, size(A, 2))
         relations = fill(:eq, size(A, 1))
-        ints_flag = fill(true, size(A, 2))
+        ints_flag = trues(size(A, 2))
 
         xs = simplex_method(A, b, c, :minimize, relations, ints_flag)
 
