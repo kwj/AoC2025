@@ -1,6 +1,8 @@
 
 module Day10
 
+import ..Simplex: simplex_method
+
 function parse_file(fname::String)
     lights = Vector{Vector{Int}}()
     buttons_lst = Vector{Vector{Vector{Int}}}()
@@ -70,6 +72,48 @@ function d10_p1(fname::String = "input")
     end
 end
 
+function d10_p2(fname::String = "input")
+    _, buttons_lst, joltages = parse_file(fname)
+
+    acc = 0
+    for (btns, b) in zip(buttons_lst, joltages)
+        A = hcat(btns...)
+        c = fill(1, size(A, 2))
+        relations = fill(:eq, size(A, 1))
+        ints_flag = fill(true, size(A, 2))
+
+        xs = simplex_method(A, b, c, :minimize, relations, ints_flag)
+
+        @assert !isnothing(xs) "error"
+        acc += sum(round.(Int, xs))
+    end
+
+    acc
+end
+
+end #module
+
+using .Day10: d10_p1, d10_p2
+export d10_p1, d10_p2
+
+
+#=
+This version uses the simplex algorithm with branch-and-bound for mixed integer linear programming.
+Compared to a recursive algorithm, it requires a long compile time during the first execution.
+
+julia> @time d10_p2("input")
+ 20.548735 seconds (8.31 M allocations: 452.729 MiB, 2.19% gc time, 98.00% compilation time)
+*****
+
+julia> @time d10_p2("input")
+  0.308357 seconds (1.23 M allocations: 102.622 MiB, 18.94% gc time)
+*****
+
+
+[recursive algorithm]
+julia> @time d10_p2("input")
+  1.671517 seconds (8.35 M allocations: 338.792 MiB, 28.28% gc time)
+
 function min_steps_charging(
     target::Vector{Int},
     amounts::Dict{String, Vector{Int}},
@@ -130,7 +174,4 @@ function d10_p2(fname::String = "input")
     result
 end
 
-end #module
-
-using .Day10: d10_p1, d10_p2
-export d10_p1, d10_p2
+=#
