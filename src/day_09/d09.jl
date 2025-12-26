@@ -258,14 +258,14 @@ function is_valid_rectangle(
             end
         end
 
-        # now, there are two unfixed positions in the rectangle.
+        # now, two undetermined corners are left in the rectangle.
         #
         #    OOOO?         ...
         # ...ggggO  or ...ggggO  , and so on   [#: red tile, X/g: green tile (on the loop/inside the loop)]
         #    ggggO        ggggO                [O: red/green tile, ?: unknow yet]]
         #     ...         OOOO?
         #
-        # if it assumes that a unfixed corner position '?' is blank space, neigther red tile nor
+        # if it assumes that a undetermined corner '?' is blank space, neigther red tile nor
         # green tile can't be placed at positions '@'. it becomes that both sides of X are blank
         # spaces, it is contradictory.
         #
@@ -275,7 +275,7 @@ function is_valid_rectangle(
         #    ggggO        ggggX.        ggggX.
         #     ...          ...           ...
         #
-        # in conclusion, a position '?' therefore must be a red or green tile.
+        # in conclusion, both position '?' therefore must be a red or green tile.
         # so the area (x1, y1) to (x2, y2) is a valid rectangle.
 
         return true

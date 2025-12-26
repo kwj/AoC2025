@@ -52,7 +52,7 @@ function d12_p1(fname::String = "input")
     # println("impossible: $impossible")
     # println("unknown: $unknown")
     if !iszero(unknown)
-        println("The following is an list of unknown regions:")
+        println("The following is a list of unknown regions:")
         println(q)
         @assert false "There is at least one region where it is unclear whether presents can be placed"
     end
