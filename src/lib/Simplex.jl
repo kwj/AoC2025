@@ -7,7 +7,7 @@ const EPS = 1.0e-9
 function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}, int_flags::AbstractVector{Bool})::Union{Nothing, Vector{Float64}}
     @assert length(int_flags) == size(A, 2) ""
 
-    function check_int_val(xs::Vector{Float64}, int_flags)::Union{Nothing, Tuple{Int, Float64}}
+    function find_non_int_val(xs::Vector{Float64}, int_flags)::Union{Nothing, Tuple{Int, Float64}}
         for (idx, flag) in pairs(int_flags)
             flag == false && continue
             isapprox(xs[idx], round(xs[idx], RoundNearest), atol = EPS) && continue
@@ -36,7 +36,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
         val = sum(tpl -> tpl[1] * tpl[2], zip(c′, xs))
         (goal == :maximize ? val < thr : val > thr) && continue
 
-        if (tpl = check_int_val(xs, int_flags); isnothing(tpl))
+        if (tpl = find_non_int_val(xs, int_flags); isnothing(tpl))
             thr = val
             result = xs
         else
