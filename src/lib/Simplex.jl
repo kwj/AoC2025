@@ -24,7 +24,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
 
     # branch-and-bound
     thr = (goal == :maximize) ? -Inf : Inf
-    result = Float64[]
+    result::Union{Nothing, Vector{Float64}} = nothing
     q = Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}, Symbol, typeof(relations)}[]
     push!(q, (A′, b′, c′, goal, relations))
 
@@ -70,7 +70,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
     if !iszero(n_a)
         # phase 1
 
-        # start/end indexes of artificial variables
+        # start/end column indexes of artificial variables
         a_start, a_end = n_x + n_s + 1, n_x + n_s + n_a
 
         # z: objective function for phase 1
