@@ -25,29 +25,31 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
     # branch-and-bound
     thr = (goal == :maximize) ? -Inf : Inf
     result::Union{Nothing, Vector{Float64}} = nothing
-    q = Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}, Symbol, typeof(relations)}[]
-    push!(q, (A′, b′, c′, goal, relations))
+    q = Tuple{Matrix{Float64}, Vector{Float64}, typeof(relations)}[]
+    push!(q, (A′, b′, relations))
 
     while !isempty(q)
-        frm = pop!(q)
-        xs = simplex_method(frm...)
+        A′, b′, relations′ = pop!(q)
+        xs = simplex_method(A′, b′, c′, goal, relations′)
         isnothing(xs) && continue
 
-        val = sum(tpl -> tpl[1] * tpl[2], zip(c′, xs))
+        val = sum(((x, y),) -> x * y, zip(c′, xs))
         (goal == :maximize ? val < thr : val > thr) && continue
 
         if (tpl = find_non_int_val(xs, int_flags); isnothing(tpl))
             thr = val
             result = xs
         else
+            i, xᵢ = tpl
+
             coeff = zeros(Float64, size(A, 2))
-            coeff[tpl[1]] = 1.0
+            coeff[i] = 1.0
 
-            low = round(tpl[2], RoundDown)
-            push!(q, (vcat(frm[1], transpose(coeff)), vcat(frm[2], low), c′, goal, vcat(frm[5], :le)))
+            low = round(xᵢ, RoundDown)
+            push!(q, (vcat(A′, transpose(coeff)), vcat(b′, low), vcat(relations′, :le)))
 
-            high = round(tpl[2], RoundUp)
-            push!(q, (vcat(frm[1], transpose(coeff)), vcat(frm[2], high), c′, goal, vcat(frm[5], :ge)))
+            high = round(xᵢ, RoundUp)
+            push!(q, (vcat(A′, transpose(coeff)), vcat(b′, high), vcat(relations′, :ge)))
         end
     end
 
