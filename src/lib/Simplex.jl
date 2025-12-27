@@ -3,7 +3,7 @@ module Simplex
 
 const EPS = 1.0e-9
 
-# Integer Linear Programming (ILP) using simplex method and branch-and-bound
+# Mixed-Integer Linear Programming (MILP) using simplex method and branch-and-bound
 function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}, int_flags::AbstractVector{Bool})::Union{Nothing, Vector{Float64}}
     @assert length(int_flags) == size(A, 2) "the size of the coefficient matrix doesn't match the length of the integer constraint vector"
 
@@ -51,16 +51,15 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
         end
     end
 
-    if isempty(result)
-        nothing
-    else
+    if !isnothing(result)
         foreach(pairs(int_flags)) do (idx, flag)
             if flag == true
                 result[idx] = round(result[idx])
             end
         end
-        result
     end
+
+    result
 end
 
 # Linear Programming (LP) using simplex method
