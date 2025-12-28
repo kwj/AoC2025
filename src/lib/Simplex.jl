@@ -68,9 +68,10 @@ end
 function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol})::Union{Nothing, Vector{Float64}}
     tbl, Z, b_vars, a_var_idxes, (n_x, n_s, n_a)  = prepare_tableau(A, b, c, goal, relations)
 
+    # if even one artificial variable exists, an obvious initial basic feasible
+    # solution (BFS) is unknown. so we must first find an initial BFS.
+    # (two-phase simplex method)
     if !iszero(n_a)
-        # phase 1
-
         # start/end column indexes of artificial variables
         a_start, a_end = n_x + n_s + 1, n_x + n_s + n_a
 
