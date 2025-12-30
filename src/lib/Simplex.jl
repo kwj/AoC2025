@@ -66,31 +66,27 @@ end
 
 # Linear Programming (LP) using simplex method
 function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol})::Union{Nothing, Vector{Float64}}
-    tbl, Z, b_vars, a_var_idxes, (n_x, n_s, n_a)  = prepare_tableau(A, b, c, goal, relations)
+    tbl, Z, basic_vars, artificial_rows, artificial_cols  = prepare_tableau(A, b, c, goal, relations)
 
     # if even one artificial variable exists, an obvious initial basic feasible
     # solution (BFS) is unknown. so we must first find an initial BFS.
     # (two-phase simplex method)
-    if !iszero(n_a)
-        # start/end column indexes of artificial variables
-        a_start, a_end = n_x + n_s + 1, n_x + n_s + n_a
-
-        # z: objective function for phase 1
+    if !isempty(artificial_rows)
         z = zeros(Float64, length(Z))
-        z[a_start:a_end] .= 1.0
+        z[artificial_cols] .= 1.0
 
-        for row in a_var_idxes
+        for row in artificial_rows
             z .-= @view tbl[row, :]
         end
 
-        standard_simplex!(tbl, b_vars, z)
+        standard_simplex!(tbl, basic_vars, z)
 
         # if there is no solution, return nothing
         !isapprox(z[end], 0.0, atol = EPS) && return nothing
 
         # if artificial variables exist among the basic variables, remove them from the basic variables if possible
-        for r_idx in findall(>=(a_start), b_vars)
-            c_idx = findfirst(x -> !isapprox(x, 0.0, atol = EPS), @view tbl[r_idx, 1:(n_x + n_s)])
+        for r_idx in findall(in(artificial_cols), basic_vars)
+            c_idx = findfirst(x -> !isapprox(x, 0.0, atol = EPS), @view tbl[r_idx, :])
             isnothing(c_idx) && continue
 
             tbl[r_idx, :] ./= tbl[r_idx, c_idx]
@@ -103,24 +99,24 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
                 tbl[r, :] .-= factor * @view tbl[r_idx, :]
             end
 
-            b_vars[r_idx] = c_idx
+            basic_vars[r_idx] = c_idx
         end
 
-        deleteat!(Z, a_start:a_end)
-        tbl = tbl[:, setdiff(axes(tbl, 2), a_start:a_end)]
+        deleteat!(Z, artificial_cols)
+        tbl = tbl[:, setdiff(axes(tbl, 2), artificial_cols)]
 
-        for row in findall(<=(n_x), b_vars)
-            x = b_vars[row]
+        for row in findall(<=(size(A, 2)), basic_vars)
+            x = basic_vars[row]
             factor = Z[x] / tbl[row, x]
             Z .-= factor .* @view tbl[row, :]
         end
     end
 
-    standard_simplex!(tbl, b_vars, Z)
+    standard_simplex!(tbl, basic_vars, Z)
 
-    result = zeros(Float64, n_x)
-    for (idx, x) in pairs(b_vars)
-        x > n_x && continue
+    result = zeros(Float64, size(A, 2))
+    for (idx, x) in pairs(basic_vars)
+        x > size(A, 2) && continue
         result[x] = tbl[idx, end]
     end
 
@@ -129,8 +125,7 @@ end
 
 function standard_simplex!(tbl, b_vars, z)
     while ((x, c_idx) = findmin(@view z[begin:end - 1]); x < -EPS)
-        (_, r_idx) = findmin(i -> tbl[i, c_idx] > 0 ? tbl[i, end] / tbl[i, c_idx] : Inf, axes(tbl, 1))
-
+        (_, r_idx) = findmin(i -> tbl[i, c_idx] > EPS ? abs(tbl[i, end] / tbl[i, c_idx]) : Inf, axes(tbl, 1))
         tbl[r_idx, :] ./= tbl[r_idx, c_idx]
         factor = z[c_idx] / tbl[r_idx, c_idx]
         z .-= factor .* @view tbl[r_idx, :]
@@ -156,9 +151,9 @@ end
 # [OUT]
 # tbl: initial coeeficient table (except Z)
 # Z: initial coeeficient of objective function
-# b_vars: column indexes of initial basic variables
-# a_var_idxes: row indexes which have an artificial value
-# tpl: # of columns (length(x), # of slack/surplus variables, # of artificial variables)
+# basic_vars: column indexes of initial basic variables
+# artificial_rows: row indexes which have an artificial value
+# artificial_cols: column indexes of artificial variables
 function prepare_tableau(A, b, c, goal, relations)
     m, n = size(A)
 
@@ -180,41 +175,51 @@ function prepare_tableau(A, b, c, goal, relations)
         end
     end
 
-    A2s = Vector{Float64}[]  # slack/surplus variables
-    A2a = Vector{Float64}[]  # artifiicial variables
     m, n = size(A1)
-    a_var_idxes = Int[]  # row indexes which have artificial variable
-    b_vars = Int[]  # column indexes of initial basic variables
-    idx = n + 1
-    for (i, sym) in pairs(relations′)
-        if sym != :eq
-            s = zeros(Float64, m)
-            if sym == :le
-                s[i] = 1.0
-                push!(b_vars, idx)
-            else
-                s[i] = -1.0
-            end
-            push!(A2s, s)
-            idx += 1
-        end
+    A2 = Vector{Float64}[]  # slack/surplus/artificial variables
+    artificial_rows = Int[]
+    artificial_cols = Int[]
+    basic_vars = Int[]
 
-        if sym != :le
+    c_idx = n
+    for (i, sym) in pairs(relations′)
+        if sym == :le
             s = zeros(Float64, m)
             s[i] = 1.0
-            push!(A2a, s)
-            push!(a_var_idxes, i)
+            push!(A2, s)
+
+            c_idx += 1
+            push!(basic_vars, c_idx)
+        elseif sym == :eq
+            s = zeros(Float64, m)
+            s[i] = 1.0
+            push!(A2, s)
+            push!(artificial_rows, i)
+
+            c_idx += 1
+            push!(basic_vars, c_idx)
+            push!(artificial_cols, c_idx)
+        else
+            s = zeros(Float64, m)
+            s[i] = -1.0
+            push!(A2, s)
+            s = zeros(Float64, m)
+            s[i] = 1.0
+            push!(A2, s)
+            push!(artificial_rows, i)
+
+            c_idx += 2
+            push!(basic_vars, c_idx)
+            push!(artificial_cols, c_idx)
         end
     end
 
-    Z = zeros(Float64, n + length(A2s) + length(A2a) + 1)
+    Z = zeros(Float64, n + length(A2) + 1)
     for (i, x) in pairs(c)
         Z[i] = (goal == :minimize) ? float(x) : -float(x)
     end
 
-    b_vars = vcat(b_vars, (n + length(A2s) + 1):(length(Z) - 1))
-
-    hcat(A1, A2s..., A2a..., b′), Z, b_vars, a_var_idxes, (n, length(A2s), length(A2a))
+    hcat(A1, A2..., b′), Z, basic_vars, artificial_rows, artificial_cols
 end
 
 end #module
