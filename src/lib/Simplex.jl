@@ -1,6 +1,14 @@
 
 module Simplex
 
+#=
+[Warning]
+This implementation is still incomplete and contains bugs.
+I have confirmed that it malfunctioned with certain inputs.
+
+I'll fix it when I have time.
+=#
+
 const EPS = 1.0e-9
 
 # Mixed-Integer Linear Programming (MILP) using simplex method and branch-and-bound
