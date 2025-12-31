@@ -125,14 +125,16 @@ end
 
 function standard_simplex!(tbl, b_vars, z)
     while ((x, c_idx) = findmin(@view z[begin:end - 1]); x < -EPS)
-        (_, r_idx) = findmin(i -> tbl[i, c_idx] > EPS ? abs(tbl[i, end] / tbl[i, c_idx]) : Inf, axes(tbl, 1))
+        (_, r_idx) = findmin(i -> tbl[i, c_idx] > EPS ? tbl[i, end] / tbl[i, c_idx] : Inf, axes(tbl, 1))
+
         tbl[r_idx, :] ./= tbl[r_idx, c_idx]
         factor = z[c_idx] / tbl[r_idx, c_idx]
         z .-= factor .* @view tbl[r_idx, :]
+
         for r in axes(tbl, 1)
             r == r_idx && continue
             factor = tbl[r, c_idx] / tbl[r_idx, c_idx]
-            tbl[r, :] .-= factor * tbl[r_idx, :]
+            tbl[r, :] .-= factor * @view tbl[r_idx, :]
         end
 
         b_vars[r_idx] = c_idx
