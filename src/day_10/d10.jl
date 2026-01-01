@@ -105,10 +105,10 @@ depending on the input data.
 
 [simplex method version]
 julia> @time d10_p2("input")
- 13.288859 seconds (5.64 M allocations: 281.510 MiB, 2.43% gc time, 99.12% compilation time)
+ 12.833311 seconds (4.51 M allocations: 225.390 MiB, 2.28% gc time, 99.00% compilation time)
 
 julia> @time d10_p2("input")
-  0.103588 seconds (567.26 k allocations: 31.869 MiB)
+  0.102441 seconds (566.21 k allocations: 31.792 MiB)
 
 
 [recursive algorithm]

@@ -36,17 +36,22 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
     function merge_constraints(A, b, relations, cs::Vector{Tuple{Int, Symbol, Float64}})
         isempty(cs) && return copy(A), copy(b), copy(relations)
 
-        lhs = zeros(Float64, length(cs), size(A, 2))
-        rhs = zeros(Float64, length(cs))
-        rels = Vector{Symbol}(undef, length(cs))
+        m, n = size(A)
+        lhs = zeros(Float64, m + length(cs), n)
+        rhs = zeros(Float64, m + length(cs))
+        rels = Vector{Symbol}(undef, m + length(cs))
+
+        copyto!(lhs, CartesianIndices(A), A, CartesianIndices(A))
+        copyto!(rhs, CartesianIndices(b), b, CartesianIndices(b))
+        copyto!(rels, CartesianIndices(relations), relations, CartesianIndices(relations))
 
         for (idx, (i, sym, v)) in pairs(cs)
-            lhs[idx, i] = 1.0
-            rhs[idx] = v
-            rels[idx] = sym
+            lhs[m + idx, i] = 1.0
+            rhs[m + idx] = v
+            rels[m + idx] = sym
         end
 
-        vcat(A, lhs), vcat(b, rhs), vcat(relations, rels)
+        lhs, rhs, rels
     end
 
     A′ = map(Float64, A)
