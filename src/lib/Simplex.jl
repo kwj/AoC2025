@@ -1,14 +1,6 @@
 
 module Simplex
 
-#=
-[Warning]
-This implementation is still incomplete and contains bugs.
-I have confirmed that it malfunctioned with certain inputs.
-
-I'll fix it when I have time.
-=#
-
 const EPS = 1.0e-9
 
 # Mixed-Integer Linear Programming (MILP) using simplex method and branch-and-bound
@@ -26,6 +18,33 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
         return nothing
     end
 
+    function add_constraint(cs::Vector{Tuple{Int, Symbol, Float64}}, x::Tuple{Int, Symbol, Float64})
+        r = copy(cs)
+        if (idx = findfirst(tpl -> tpl[1] == x[1], cs); isnothing(idx))
+            push!(r, x)
+        else
+            r[idx] = x
+        end
+
+        r
+    end
+
+    function make_constraints(A, b, relations, cs::Vector{Tuple{Int, Symbol, Float64}})
+        isempty(cs) && return A, b, relations
+
+        lhs = zeros(Float64, length(cs), size(A, 2))
+        rhs = zeros(Float64, length(cs))
+        rels = Vector{Symbol}(undef, length(cs))
+
+        for (idx, (i, sym, v)) in pairs(cs)
+            lhs[idx, i] = 1.0
+            rhs[idx] = v
+            rels[idx] = sym
+        end
+
+        vcat(A, lhs), vcat(b, rhs), vcat(relations, rels)
+    end
+
     A′ = map(Float64, A)
     b′ = map(Float64, b)
     c′ = map(Float64, c)
@@ -33,12 +52,15 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
     # branch-and-bound
     thr = (goal == :maximize) ? -Inf : Inf
     result::Union{Nothing, Vector{Float64}} = nothing
-    q = Tuple{Matrix{Float64}, Vector{Float64}, typeof(relations)}[]
-    push!(q, (A′, b′, relations))
+
+    q = Vector{Tuple{Int, Symbol, Float64}}[]
+    push!(q, Tuple{Int, Symbol, Float64}[])
 
     while !isempty(q)
-        A′, b′, relations′ = pop!(q)
-        xs = simplex_method(A′, b′, c′, goal, relations′)
+        cs = popfirst!(q)
+        _A, _b, _relations = make_constraints(A′, b′, relations, cs)
+
+        xs = simplex_method(_A, _b, c′, goal, _relations)
         isnothing(xs) && continue
 
         val = sum(((x, y),) -> x * y, zip(c′, xs))
@@ -50,14 +72,10 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
         else
             i, xᵢ = tpl
 
-            coeff = zeros(Float64, size(A, 2))
-            coeff[i] = 1.0
-
-            low = round(xᵢ, RoundDown)
-            push!(q, (vcat(A′, transpose(coeff)), vcat(b′, low), vcat(relations′, :le)))
-
-            high = round(xᵢ, RoundUp)
-            push!(q, (vcat(A′, transpose(coeff)), vcat(b′, high), vcat(relations′, :ge)))
+            # low
+            push!(q, add_constraint(cs, (i, :le, round(xᵢ, RoundDown))))
+            # high
+            push!(q, add_constraint(cs, (i, :ge, round(xᵢ, RoundUp))))
         end
     end
 
@@ -132,7 +150,8 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
 end
 
 function standard_simplex!(tbl, b_vars, z)
-    while ((x, c_idx) = findmin(@view z[begin:end - 1]); x < -EPS)
+    # use Brand's rule to avoid cycle
+    while (c_idx = findfirst(x -> x < -EPS, @view z[begin:end - 1]); !isnothing(c_idx))
         (_, r_idx) = findmin(i -> tbl[i, c_idx] > EPS ? tbl[i, end] / tbl[i, c_idx] : Inf, axes(tbl, 1))
 
         tbl[r_idx, :] ./= tbl[r_idx, c_idx]
