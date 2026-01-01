@@ -86,7 +86,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
     if !isnothing(result)
         foreach(pairs(int_flags)) do (idx, flag)
             if flag == true
-                result[idx] = round(result[idx])
+                result[idx] = round(result[idx], RoundNearest)
             end
         end
     end
