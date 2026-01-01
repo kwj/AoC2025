@@ -33,7 +33,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
         r
     end
 
-    function make_constraints(A, b, relations, cs::Vector{Tuple{Int, Symbol, Float64}})
+    function merge_constraints(A, b, relations, cs::Vector{Tuple{Int, Symbol, Float64}})
         isempty(cs) && return A, b, relations
 
         lhs = zeros(Float64, length(cs), size(A, 2))
@@ -62,7 +62,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
 
     while !isempty(q)
         cs = popfirst!(q)
-        _A, _b, _relations = make_constraints(A′, b′, relations, cs)
+        _A, _b, _relations = merge_constraints(A′, b′, relations, cs)
 
         xs = simplex_method(_A, _b, c′, goal, _relations)
         isnothing(xs) && continue
@@ -153,7 +153,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
     result
 end
 
-function standard_simplex!(tbl, b_vars, z)
+function standard_simplex!(tbl, basic_vars, z)
     # use Brand's rule to avoid cycle
     while (c_idx = findfirst(x -> x < -EPS, @view z[begin:end - 1]); !isnothing(c_idx))
         (_, r_idx) = findmin(i -> tbl[i, c_idx] > EPS ? tbl[i, end] / tbl[i, c_idx] : Inf, axes(tbl, 1))
@@ -168,10 +168,10 @@ function standard_simplex!(tbl, b_vars, z)
             tbl[r, :] .-= factor * @view tbl[r_idx, :]
         end
 
-        b_vars[r_idx] = c_idx
+        basic_vars[r_idx] = c_idx
     end
 
-    tbl, b_vars, z
+    tbl, basic_vars, z
 end
 
 # [IN]
