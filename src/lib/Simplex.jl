@@ -1,6 +1,10 @@
 
 module Simplex
 
+#=
+Note that this module was implemented for the AoC 2025 Day 10 and is not suitable for general use.
+=#
+
 const EPS = 1.0e-9
 
 # Mixed-Integer Linear Programming (MILP) using simplex method and branch-and-bound
