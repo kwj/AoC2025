@@ -98,16 +98,17 @@ export d10_p1, d10_p2
 
 
 #=
-This version uses the simplex algorithm with branch-and-bound for mixed integer linear programming.
+This version uses the simplex algorithm with branch-and-bound for mixed-integer linear programming.
 Compared to a recursive algorithm, it requires a long compile time during the first execution.
+Below are results on my Raspberry Pi 4, but processing speed will be several times slower
+depending on the input data.
+
+[simplex method version]
+julia> @time d10_p2("input")
+ 13.288859 seconds (5.64 M allocations: 281.417 MiB, 2.49% gc time, 99.12% compilation time)
 
 julia> @time d10_p2("input")
- 20.548735 seconds (8.31 M allocations: 452.729 MiB, 2.19% gc time, 98.00% compilation time)
-*****
-
-julia> @time d10_p2("input")
-  0.308357 seconds (1.23 M allocations: 102.622 MiB, 18.94% gc time)
-*****
+  0.103588 seconds (566.36 k allocations: 31.759 MiB)
 
 
 [recursive algorithm]
