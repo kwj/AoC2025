@@ -8,7 +8,7 @@ Note that this module was implemented for the AoC 2025 Day 10 and is not suitabl
 const EPS = 1.0e-9
 
 # Mixed-Integer Linear Programming (MILP) using simplex method and branch-and-bound
-function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}, int_flags::AbstractVector{Bool})::Union{Nothing, Vector{Float64}}
+function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol, int_flags::AbstractVector{Bool})::Union{Nothing, Vector{Float64}}
     @assert length(int_flags) == size(A, 2) "the size of the coefficient matrix doesn't match the length of the integer constraint vector"
 
     function find_non_int_val(xs::Vector{Float64}, int_flags)::Union{Nothing, Tuple{Int, Float64}}
@@ -34,7 +34,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
     end
 
     function merge_constraints(A, b, relations, cs::Vector{Tuple{Int, Symbol, Float64}})
-        isempty(cs) && return A, b, relations
+        isempty(cs) && return copy(A), copy(b), copy(relations)
 
         lhs = zeros(Float64, length(cs), size(A, 2))
         rhs = zeros(Float64, length(cs))
@@ -62,9 +62,8 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
 
     while !isempty(q)
         cs = popfirst!(q)
-        _A, _b, _relations = merge_constraints(A′, b′, relations, cs)
 
-        xs = simplex_method(_A, _b, c′, goal, _relations)
+        xs = simplex_method(merge_constraints(A′, b′, relations, cs)..., c′, goal)
         isnothing(xs) && continue
 
         val = sum(((x, y),) -> x * y, zip(c′, xs))
@@ -95,7 +94,7 @@ function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol}
 end
 
 # Linear Programming (LP) using simplex method
-function simplex_method(A, b, c, goal::Symbol, relations::AbstractVector{Symbol})::Union{Nothing, Vector{Float64}}
+function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol)::Union{Nothing, Vector{Float64}}
     tbl, Z, basic_vars, artificial_rows, artificial_cols  = prepare_tableau(A, b, c, goal, relations)
 
     # if even one artificial variable exists, an obvious initial basic feasible

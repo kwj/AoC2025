@@ -82,7 +82,7 @@ function d10_p2(fname::String = "input")
         relations = fill(:eq, size(A, 1))
         ints_flag = trues(size(A, 2))
 
-        xs = simplex_method(A, b, c, :minimize, relations, ints_flag)
+        xs = simplex_method(A, b, relations, c, :minimize, ints_flag)
         @assert !isnothing(xs) "No integer solution was found for the problem on line $idx"
 
         acc += sum(round.(Int, xs))
@@ -105,10 +105,10 @@ depending on the input data.
 
 [simplex method version]
 julia> @time d10_p2("input")
- 13.288859 seconds (5.64 M allocations: 281.417 MiB, 2.49% gc time, 99.12% compilation time)
+ 13.288859 seconds (5.64 M allocations: 281.510 MiB, 2.43% gc time, 99.12% compilation time)
 
 julia> @time d10_p2("input")
-  0.103588 seconds (566.36 k allocations: 31.759 MiB)
+  0.103588 seconds (567.26 k allocations: 31.869 MiB)
 
 
 [recursive algorithm]
