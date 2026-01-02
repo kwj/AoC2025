@@ -2,10 +2,15 @@
 module Simplex
 
 #=
-Note that this module was implemented for the AoC 2025 Day 10 and is not suitable for general use.
+Note that this module was written for the AoC 2025 Day 10 (Part 2) and is not suitable for general use.
 =#
 
 const EPS = 1.0e-9
+
+# additional constraint in branch-and-bound
+# (index of variable, relational symbol, value)
+#   example: x₂ <= 3.0 --> (2, :le, 3.0)
+const AddlConstraint = Tuple{Int, Symbol, Float64}
 
 # Mixed-Integer Linear Programming (MILP) using simplex method and branch-and-bound
 function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol, int_flags::AbstractVector{Bool})::Union{Nothing, Vector{Float64}}
@@ -22,7 +27,7 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
         return nothing
     end
 
-    function add_constraint(cs::Vector{Tuple{Int, Symbol, Float64}}, x::Tuple{Int, Symbol, Float64})
+    function add_constraint(cs::Vector{AddlConstraint}, x::AddlConstraint)
         r = copy(cs)
         if (idx = findfirst(tpl -> tpl[1] == x[1], cs); isnothing(idx))
             push!(r, x)
@@ -33,7 +38,7 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
         r
     end
 
-    function merge_constraints(A, b, relations, cs::Vector{Tuple{Int, Symbol, Float64}})
+    function merge_constraints(A, b, relations, cs::Vector{AddlConstraint})
         isempty(cs) && return copy(A), copy(b), copy(relations)
 
         m, n = size(A)
@@ -62,8 +67,8 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
     thr = (goal == :maximize) ? -Inf : Inf
     result::Union{Nothing, Vector{Float64}} = nothing
 
-    q = Vector{Tuple{Int, Symbol, Float64}}[]
-    push!(q, Tuple{Int, Symbol, Float64}[])
+    q = Vector{AddlConstraint}[]
+    push!(q, AddlConstraint[])
 
     while !isempty(q)
         cs = popfirst!(q)
@@ -212,7 +217,6 @@ function prepare_tableau(A, b, c, goal, relations)
         end
     end
 
-    m, n = size(A1)
     A2 = Vector{Float64}[]  # slack/surplus/artificial variables
     artificial_rows = Int[]
     artificial_cols = Int[]
