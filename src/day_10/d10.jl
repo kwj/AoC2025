@@ -77,10 +77,10 @@ function d10_p2(fname::String = "input")
 
     acc = 0
     for (idx, (btns, b)) in Iterators.enumerate(zip(buttons_lst, joltages))
-        A = hcat(btns...)
-        c = ones(Int, size(A, 2))
+        A = stack(btns, dims = 2)
+        c = ones(Int, size(A, 2))  # coefficients of the objective function
         relations = fill(:eq, size(A, 1))
-        ints_flag = trues(size(A, 2))
+        ints_flag = trues(size(A, 2))  # all variables must be integers
 
         xs = simplex_method(A, b, relations, c, :minimize, ints_flag)
         @assert !isnothing(xs) "No integer solution was found for the problem on line $idx"
