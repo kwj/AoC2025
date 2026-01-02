@@ -105,7 +105,7 @@ end
 
 # Linear Programming (LP) using simplex method
 function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol)::Union{Nothing, Vector{Float64}}
-    tbl, Z, basic_vars, artificial_rows, artificial_cols  = prepare_tableau(A, b, c, goal, relations)
+    tbl, Z, basic_vars, artificial_rows, artificial_cols  = prepare_tableau(A, b, relations, c, goal)
 
     # if even one artificial variable exists, an obvious initial basic feasible
     # solution (BFS) is unknown. so we must first find an initial BFS.
@@ -186,9 +186,9 @@ end
 # [IN]
 # A: coefficient (constraint function) LHS / matrix
 # b: coefficient (constraint function) RHS / vector
+# relations: relationship symbol (:le, :eq, :ge) / vector
 # c: coefficient (objective function) / vector
 # goal: objective / :maximize or :minimize
-# relations: relationship symbol (:le, :eq, :ge) / vector
 #
 # [OUT]
 # tbl: initial coeeficient table (except Z)
@@ -196,7 +196,7 @@ end
 # basic_vars: column indexes of initial basic variables
 # artificial_rows: row indexes which have an artificial value
 # artificial_cols: column indexes of artificial variables
-function prepare_tableau(A, b, c, goal, relations)
+function prepare_tableau(A, b, relations, c, goal)
     m, n = size(A)
 
     @assert m == length(b) "the size of coefficient matrix (LHS) doesn't match the length of the coefficient vector (RHS)"
