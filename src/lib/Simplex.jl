@@ -68,10 +68,9 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
     c′ = map(Float64, c)
 
     # branch-and-bound
-    thr = (goal == :maximize) ? -Inf : Inf
     result::Union{Nothing, Vector{Float64}} = nothing
-
-    q = Vector{AddlConstraint}[]
+    thr = (goal == :maximize) ? -Inf : Inf
+    q = Vector{AddlConstraint}[]  # FIFO queue (for Breadth-first search)
     push!(q, AddlConstraint[])
 
     while !isempty(q)
