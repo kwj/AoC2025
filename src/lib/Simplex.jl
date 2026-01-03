@@ -7,9 +7,13 @@ Note that this module was written for the AoC 2025 Day 10 (Part 2) and is not su
 
 const EPS = 1.0e-9
 
+const LE = :le
+const EQ = :eq
+const GE = :ge
+
 # additional constraint in branch-and-bound
 # (index of variable, relational symbol, value)
-#   example: x₂ <= 3.0 --> (2, :le, 3.0)
+#   example: x₂ <= 3.0 --> (2, LE, 3.0)
 const AddlConstraint = Tuple{Int, Symbol, Float64}
 
 # Mixed-Integer Linear Programming (MILP) using simplex method and branch-and-bound
@@ -86,9 +90,9 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
             i, xᵢ = tpl
 
             # low
-            push!(q, add_constraint(cs, (i, :le, round(xᵢ, RoundDown))))
+            push!(q, add_constraint(cs, (i, LE, round(xᵢ, RoundDown))))
             # high
-            push!(q, add_constraint(cs, (i, :ge, round(xᵢ, RoundUp))))
+            push!(q, add_constraint(cs, (i, GE, round(xᵢ, RoundUp))))
         end
     end
 
@@ -186,7 +190,7 @@ end
 # [IN]
 # A: coefficient (constraint function) LHS / matrix
 # b: coefficient (constraint function) RHS / vector
-# relations: relationship symbol (:le, :eq, :ge) / vector
+# relations: relationship symbol (LE, EQ, GE) / vector
 # c: coefficient (objective function) / vector
 # goal: objective / :maximize or :minimize
 #
@@ -203,7 +207,7 @@ function prepare_tableau(A, b, relations, c, goal)
     @assert m == length(relations) "the size of coefficient matrix doesn't match the length of the relations vector"
     @assert n == length(c) "the size of coefficient matrix doesn't match the length of the objective function vector"
     @assert goal ∈ (:maximize, :minimize) "the goal argument must be either :maximize or :minimize"
-    @assert all(in((:le, :eq, :ge)), relations) "invalid relationship symbol is found"
+    @assert all(in((LE, EQ, GE)), relations) "invalid relationship symbol is found"
 
     A1 = map(Float64, A)
     b′ = map(Float64, b)
@@ -212,8 +216,8 @@ function prepare_tableau(A, b, relations, c, goal)
     for i in findall(signbit, b′)
         map!(x -> -x, @view A1[i, :])
         b′[i] = -b′[i]
-        if relations′[i] != :eq
-            relations′[i] = (relations′[i] == :le) ? :ge : le
+        if relations′[i] != EQ
+            relations′[i] = (relations′[i] == LE) ? GE : LE
         end
     end
 
@@ -224,14 +228,14 @@ function prepare_tableau(A, b, relations, c, goal)
 
     c_idx = n
     for (i, sym) in pairs(relations′)
-        if sym == :le
+        if sym == LE
             s = zeros(Float64, m)
             s[i] = 1.0
             push!(A2, s)
 
             c_idx += 1
             push!(basic_vars, c_idx)
-        elseif sym == :eq
+        elseif sym == EQ
             s = zeros(Float64, m)
             s[i] = 1.0
             push!(A2, s)
