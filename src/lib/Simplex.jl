@@ -167,7 +167,7 @@ end
 
 function standard_simplex!(tbl, basic_vars, z)
     # use Brand's rule to avoid cycle
-    while (c_idx = findfirst(x -> x < -EPS, @view z[begin:end - 1]); !isnothing(c_idx))
+    while (c_idx = findfirst(<(-EPS), @view z[begin:end - 1]); !isnothing(c_idx))
         (_, r_idx) = findmin(i -> tbl[i, c_idx] > EPS ? tbl[i, end] / tbl[i, c_idx] : Inf, axes(tbl, 1))
 
         tbl[r_idx, :] ./= tbl[r_idx, c_idx]
