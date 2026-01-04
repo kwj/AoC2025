@@ -8,7 +8,6 @@ function parse_file(fname::String)
     buttons_lst = Vector{Vector{Vector{Int}}}()
     joltages = Vector{Vector{Int}}()
 
-    #for line in split.(readlines(fname), isspace)
     for line in split.(readlines(joinpath(@__DIR__, fname)), isspace)
         push!(lights, map(ch -> ch == '#' ? 1 : 0, collect(line[1][begin + 1:end - 1])))
         push!(joltages, (map(s -> parse(Int, s), split(line[end], !isnumeric, keepempty = false))))
