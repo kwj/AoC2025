@@ -76,8 +76,8 @@ function d10_p2(fname::String = "input")
     _, buttons_lst, joltages = parse_file(fname)
 
     acc = 0
-    for (idx, (btns, b)) in enumerate(zip(buttons_lst, joltages))
-        A = stack(btns, dims = 2)
+    for (idx, (buttons, b)) in enumerate(zip(buttons_lst, joltages))
+        A = stack(buttons, dims = 2)
         c = ones(Int, size(A, 2))  # coefficients of the objective function
         relations = fill(:eq, size(A, 1))
         ints_flag = trues(size(A, 2))  # all variables must be integers
