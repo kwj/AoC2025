@@ -8,6 +8,8 @@ sufficient testing. It is low quality and therefore isn't suitable for general u
 
 const EPS = 1.0e-9
 
+# preventing bugs caused by typos.
+# I accidentally wrote `SOME_CONDITION ? :ge : le`. Sigh.
 const LE = :le
 const EQ = :eq
 const GE = :ge
