@@ -42,6 +42,9 @@ function make_ranges(rng_data::AbstractString)
     # example: rngs
     #   [(1, 1), (3, -1), (5, 1), (7, 1), (7, -1), (10, 1), (13, -1), (15, -1)]
     #   --> [(1, 3), (5, 15)]
+    #
+    # Note that this method can't concatenate adjacent ranges.
+    # For example, it doesn't concatenate (1,5) and (6,10) to (1,10)
     rngs = Vector{Tuple{Int, Int}}()
     start = 0
     counter = 0

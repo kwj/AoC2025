@@ -41,7 +41,7 @@ function d04_p2(fname::String = "input"; thr = 4)
     while (rolls = find_rolls_to_remove(grid, thr); !isempty(rolls))
         acc += length(rolls)
 
-        # remove rolls of paper from the grid
+        # remove rolls from the grid
         grid[rolls] .= 0
     end
 

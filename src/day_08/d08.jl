@@ -25,7 +25,7 @@ function make_conn_lst(boxes::Vector{Box})
     for i = 1:length(boxes) - 1, j = (i + 1):length(boxes)
         push!(conns, (distance(boxes[i], boxes[j]), (i, j)))
     end
-    # select the in-place algorithm quick sort to reduce memory usage
+    # use in-place quick sort algorithm to reduce memory usage
     sort!(conns, alg = QuickSort, by = first)
 
     conns

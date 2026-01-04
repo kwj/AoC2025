@@ -76,7 +76,7 @@ function d10_p2(fname::String = "input")
     _, buttons_lst, joltages = parse_file(fname)
 
     acc = 0
-    for (idx, (btns, b)) in Iterators.enumerate(zip(buttons_lst, joltages))
+    for (idx, (btns, b)) in enumerate(zip(buttons_lst, joltages))
         A = stack(btns, dims = 2)
         c = ones(Int, size(A, 2))  # coefficients of the objective function
         relations = fill(:eq, size(A, 1))
@@ -101,14 +101,14 @@ export d10_p1, d10_p2
 This version uses the simplex algorithm with branch-and-bound for mixed-integer linear programming.
 Compared to a recursive algorithm, it requires a long compile time during the first execution.
 Below are results on my Raspberry Pi 4, but processing speed will be several times slower
-depending on the input data.
+depending on input data.
 
 [simplex method version]
 julia> @time d10_p2("input")
- 12.833311 seconds (4.51 M allocations: 225.390 MiB, 2.28% gc time, 99.00% compilation time)
+ 6.314457 seconds (2.61 M allocations: 134.171 MiB, 10.93% gc time, 91.33% compilation time)
 
 julia> @time d10_p2("input")
-  0.102441 seconds (566.21 k allocations: 31.792 MiB)
+  0.121216 seconds (565.63 k allocations: 31.751 MiB, 16.52% gc time)
 
 
 [recursive algorithm]

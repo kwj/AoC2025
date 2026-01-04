@@ -2,7 +2,8 @@
 module Simplex
 
 #=
-Note that this module was written for the AoC 2025 Day 10 (Part 2) and is not suitable for general use.
+Note that this module was just written for the AoC 2025 Day 10 (Part 2) and has not undergone
+sufficient testing. It is low quality and therefore isn't suitable for general use.
 =#
 
 const EPS = 1.0e-9
