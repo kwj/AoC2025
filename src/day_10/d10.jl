@@ -48,14 +48,13 @@ function min_steps_lighting(light::Vector{Int}, buttons::Vector{Vector{Int}})
         empty!(next_state)
 
         for x1 in state, x2 in btns
-            v = xor(x1, x2)
+            (v = xor(x1, x2)) == target && return steps
+
             if v ∉ seen
                 push!(seen, v)
                 push!(next_state, v)
             end
         end
-
-        target ∈ seen && return steps
 
         state, next_state = next_state, state
     end
