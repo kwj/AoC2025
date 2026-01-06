@@ -41,8 +41,10 @@ function d11_p2(fname::String = "input")
                 (st.dac && st.fft) ? 1 : 0
             else
                 if st.dev_name == "dac"
+                    @assert st.dac == false "a cycle is found (dac)"
                     st = State(st, dac = true)
                 elseif st.dev_name == "fft"
+                    @assert st.fft == false "a cycle is found (fft)"
                     st = State(st, fft = true)
                 end
 
