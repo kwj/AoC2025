@@ -275,8 +275,8 @@ function is_valid_rectangle(
         #    ggggO        ggggX.        ggggX.
         #     ...          ...           ...
         #
-        # in conclusion, both position '?' therefore must be a red or green tile.
-        # so the area (x1, y1) to (x2, y2) is a valid rectangle.
+        # in conclusion, both positions '?' therefore must be a red or green tile.
+        # so the area p1(x1, y1) to p2(x2, y2) is a valid rectangle.
 
         return true
     end
