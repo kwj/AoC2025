@@ -12,18 +12,18 @@ end
 distance(b1::Box, b2::Box) = (b1.x - b2.x) ^ 2 + (b1.y - b2.y) ^ 2 + (b1.z - b2.z) ^ 2
 
 function parse_file(fname::String)
-    map(split.(readlines(joinpath(@__DIR__, fname)), !isnumeric)) do v
-        Box(parse.(Int, v)...)
+    map(split.(readlines(joinpath(@__DIR__, fname)), !isnumeric)) do vs
+        Box(parse.(Int, vs)...)
     end
 end
 
 # make a connection list sorted in ascending order by the distance between each box
 function make_conn_lst(boxes::Vector{Box})
-    conns = Vector{Tuple{Int, Tuple{Int, Int}}}()
+    conns = Vector{NTuple{3, Int}}()
     sizehint!(conns, div(length(boxes) * (length(boxes) - 1), 2))
 
     for i = 1:length(boxes) - 1, j = (i + 1):length(boxes)
-        push!(conns, (distance(boxes[i], boxes[j]), (i, j)))
+        push!(conns, (distance(boxes[i], boxes[j]), i, j))
     end
 
     # return sorted `conns`
@@ -36,9 +36,9 @@ function loop(boxes::Vector{Box}, cnt::Int)
     conns = make_conn_lst(boxes)
     djs = DisjointSet(length(boxes))
 
-    foreach(((_, (i, j)),) -> unite!(djs, i, j), Iterators.take(conns, cnt))
+    foreach(((_, i, j),) -> unite!(djs, i, j), Iterators.take(conns, cnt))
 
-    reduce(*, @view sort(map(length, groups(djs)), rev = true)[1:3])
+    reduce(*, @view sort!(map(length, groups(djs)), alg = QuickSort, rev = true)[1:3])
 end
 
 # part two
@@ -46,7 +46,7 @@ function loop(boxes::Vector{Box})
     conns = make_conn_lst(boxes)
     djs = DisjointSet(length(boxes))
 
-    for (_, (i, j)) in conns
+    for (_, i, j) in conns
         unite!(djs, i, j)
 
         if group_size(djs, 1) == length(boxes)
