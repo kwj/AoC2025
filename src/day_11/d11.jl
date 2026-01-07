@@ -13,12 +13,14 @@ function parse_file(fname::String)
     dev_info
 end
 
+# part one
 function count_paths(d::String, memo::Dict{String, Int}, devs::Dict{String, Vector{String}})
     get!(memo, d) do
         d == "out" ? 1 : sum(next_d -> count_paths(next_d, memo, devs), devs[d])
     end
 end
 
+# part two
 struct State
     dev_name::String
     dac::Bool
