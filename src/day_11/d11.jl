@@ -13,17 +13,10 @@ function parse_file(fname::String)
     dev_info
 end
 
-function d11_p1(fname::String = "input")
-    function aux(d::String, memo::Dict{String, Int}, devs::Dict{String, Vector{String}})
-        get!(memo, d) do
-            d == "out" ? 1 : sum(next_d -> aux(next_d, memo, devs), devs[d])
-        end
+function count_paths(d::String, memo::Dict{String, Int}, devs::Dict{String, Vector{String}})
+    get!(memo, d) do
+        d == "out" ? 1 : sum(next_d -> count_paths(next_d, memo, devs), devs[d])
     end
-
-    dev_info = parse_file(fname)
-    memo = Dict{String, Int}()
-
-    aux("you", memo, dev_info)
 end
 
 struct State
@@ -34,32 +27,30 @@ end
 
 State(x::State; dev_name = x.dev_name, dac = x.dac, fft = x.fft) = State(dev_name, dac, fft)
 
-function d11_p2(fname::String = "input")
-    function aux(st::State, memo::Dict{State, Int}, devs::Dict{String, Vector{String}})
-        get!(memo, st) do
-            if st.dev_name == "out"
-                (st.dac && st.fft) ? 1 : 0
-            else
-                if st.dev_name == "dac"
-                    @assert st.dac == false "a cycle is found (dac)"
-                    st = State(st, dac = true)
-                elseif st.dev_name == "fft"
-                    @assert st.fft == false "a cycle is found (fft)"
-                    st = State(st, fft = true)
-                end
+function count_paths(st::State, memo::Dict{State, Int}, devs::Dict{String, Vector{String}})
+    get!(memo, st) do
+        if st.dev_name == "out"
+            (st.dac && st.fft) ? 1 : 0
+        else
+            if st.dev_name == "dac"
+                @assert st.dac == false "a cycle is found (dac)"
+                st = State(st, dac = true)
+            elseif st.dev_name == "fft"
+                @assert st.fft == false "a cycle is found (fft)"
+                st = State(st, fft = true)
+            end
 
-                sum(devs[st.dev_name]) do next_d
-                    aux(State(st, dev_name = next_d), memo, devs)
-                end
+            sum(devs[st.dev_name]) do next_d
+                count_paths(State(st, dev_name = next_d), memo, devs)
             end
         end
     end
-
-    dev_info = parse_file(fname)
-    memo = Dict{State, Int}()
-
-    aux(State("svr", false, false), memo, dev_info)
 end
+
+d11(fname::String, aux::Function, start) = aux(start, Dict{typeof(start), Int}(), parse_file(fname))
+
+d11_p1(fname::String = "input") = d11(fname, count_paths, "you")
+d11_p2(fname::String = "input") = d11(fname, count_paths, State("svr", false, false))
 
 end #module
 
