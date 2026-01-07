@@ -1,7 +1,7 @@
 
 module Day08
 
-import ..UnionFind: Disjoint, unite!, groups, group_size
+import ..UnionFind: DisjointSet, unite!, groups, group_size
 
 struct Box
     x::Int
@@ -34,7 +34,7 @@ end
 # part one
 function loop(boxes::Vector{Box}, cnt::Int)
     conns = make_conn_lst(boxes)
-    djs = Disjoint(length(boxes))
+    djs = DisjointSet(length(boxes))
 
     for (_, (i, j)) in Iterators.take(conns, cnt)
         unite!(djs, i, j)
@@ -46,7 +46,7 @@ end
 # part two
 function loop(boxes::Vector{Box})
     conns = make_conn_lst(boxes)
-    djs = Disjoint(length(boxes))
+    djs = DisjointSet(length(boxes))
 
     for (_, (i, j)) in conns
         unite!(djs, i, j)
