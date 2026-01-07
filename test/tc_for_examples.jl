@@ -64,7 +64,7 @@
         @test d08_p1("input0", thr = 10) == 40
     end
     @testset "Day 8 / Part 2" begin
-        @test d08_p2("input0", thr = 0) == 25272
+        @test d08_p2("input0") == 25272
     end
 
     @testset "Day 9 / Part 1" begin

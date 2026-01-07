@@ -1,7 +1,7 @@
 
 module Day08
 
-import ..UnionFind: Disjoint, is_same, unite!, groups, group_size
+import ..UnionFind: Disjoint, unite!, groups, group_size
 
 struct Box
     x::Int
@@ -25,37 +25,42 @@ function make_conn_lst(boxes::Vector{Box})
     for i = 1:length(boxes) - 1, j = (i + 1):length(boxes)
         push!(conns, (distance(boxes[i], boxes[j]), (i, j)))
     end
-    # use in-place quick sort algorithm to reduce memory usage
-    sort!(conns, alg = QuickSort, by = first)
 
-    conns
+    # return sorted `conns`
+    # to reduce memory usage, use the in-place QuickSort algorithm
+    sort!(conns, alg = QuickSort, by = first)
 end
 
-function d08(fname::String, thr)
-    boxes = parse_file(fname)
+# part one
+function loop(boxes::Vector{Box}, cnt::Int)
     conns = make_conn_lst(boxes)
-    dj = Disjoint(length(boxes))
+    djs = Disjoint(length(boxes))
 
-    p1, p2 = 0, 0
-    for (cnt, (_, (i, j))) in pairs(conns)
-        unite!(dj, i, j)
+    for (_, (i, j)) in Iterators.take(conns, cnt)
+        unite!(djs, i, j)
+    end
 
-        if cnt == thr
-            p1 = reduce(*, sort(map(length, groups(dj)), rev = true)[1:3])
-            break
-        end
+    reduce(*, @view sort(map(length, groups(djs)), rev = true)[1:3])
+end
 
-        if group_size(dj, i) == length(boxes)
-            p2 = boxes[i].x * boxes[j].x
-            break
+# part two
+function loop(boxes::Vector{Box})
+    conns = make_conn_lst(boxes)
+    djs = Disjoint(length(boxes))
+
+    for (_, (i, j)) in conns
+        unite!(djs, i, j)
+
+        if group_size(djs, 1) == length(boxes)
+            return boxes[i].x * boxes[j].x
         end
     end
 
-    p1, p2
+    @assert false "unreachable"
 end
 
-d08_p1(fname::String = "input"; thr = 1_000) = d08(fname, thr)[1]
-d08_p2(fname::String = "input"; thr = 0) = d08(fname, thr)[2]
+d08_p1(fname::String = "input"; thr = 1_000) = loop(parse_file(fname), thr)
+d08_p2(fname::String = "input") = loop(parse_file(fname))
 
 end #module
 
