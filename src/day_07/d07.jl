@@ -7,7 +7,7 @@ end
 
 function d07(fname::String)
     header, rows... = parse_file(fname)
-    @assert all(line -> length(line) == length(header), rows) "valid input data"
+    @assert all(line -> length(line) == length(header), rows) "invalid input data"
 
     cur_beams = zeros(Int, size(header))
     cur_beams[findfirst(==('S'), header)] = 1
