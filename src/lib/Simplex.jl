@@ -35,14 +35,14 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
     end
 
     function add_constraint(cs::Vector{AddlConstraint}, x::AddlConstraint)
-        r = copy(cs)
+        new_cs = copy(cs)
         if (idx = findfirst(tpl -> tpl[1] == x[1], cs); isnothing(idx))
-            push!(r, x)
+            push!(new_cs, x)
         else
-            r[idx] = x
+            new_cs[idx] = x
         end
 
-        r
+        new_cs
     end
 
     function merge_constraints(A, b, relations, cs::Vector{AddlConstraint})
