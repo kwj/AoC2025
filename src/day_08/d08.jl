@@ -36,7 +36,7 @@ function loop(boxes::Vector{Box}, cnt::Int)
     conns = make_conn_lst(boxes)
     djs = DisjointSet(length(boxes))
 
-    foreach(((_, i, j),) -> unite!(djs, i, j), Iterators.take(conns, cnt))
+    foreach(((_, i, j),) -> unite!(djs, i, j), view(conns, 1:cnt))
 
     reduce(*, @view sort!(map(length, groups(djs)), alg = QuickSort, rev = true)[1:3])
 end
