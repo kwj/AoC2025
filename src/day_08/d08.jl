@@ -1,7 +1,7 @@
 
 module Day08
 
-import ..UnionFind: DisjointSet, unite!, groups, group_size
+import ..UnionFind: DisjointSet, unite!, groups
 
 struct Box
     x::Int
@@ -45,13 +45,10 @@ end
 function loop(boxes::Vector{Box})
     conns = make_conn_lst(boxes)
     djs = DisjointSet(length(boxes))
+    thr = length(boxes)
 
     for (_, i, j) in conns
-        unite!(djs, i, j)
-
-        if group_size(djs, 1) == length(boxes)
-            return boxes[i].x * boxes[j].x
-        end
+        unite!(djs, i, j) == thr && return boxes[i].x * boxes[j].x
     end
 
     @assert false "unreachable"
