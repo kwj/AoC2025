@@ -41,18 +41,23 @@ function unite!(self::DisjointSet, x, y)
 
     xᵣ = root!(self, x)
     yᵣ = root!(self, y)
+    grp_size = abs(self.elems[xᵣ])
     if xᵣ != yᵣ
         if self.rank[xᵣ] < self.rank[yᵣ]
             self.elems[yᵣ] += self.elems[xᵣ]
             self.elems[xᵣ] = yᵣ
+            grp_size = abs(self.elems[yᵣ])
         else
             self.elems[xᵣ] += self.elems[yᵣ]
             self.elems[yᵣ] = xᵣ
             if self.rank[xᵣ] == self.rank[yᵣ]
                 self.rank[xᵣ] += 1
             end
+            grp_size = abs(self.elems[xᵣ])
         end
     end
+
+    grp_size
 end
 
 function group_size(self::DisjointSet, x)
