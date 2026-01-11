@@ -31,18 +31,18 @@ function make_conn_lst(boxes::Vector{Box})
     sort!(conns, alg = QuickSort, by = first)
 end
 
-# part one
-function loop(boxes::Vector{Box}, cnt::Int)
+function d08_p1(fname::String = "input"; cnt = 1_000)
+    boxes = parse_file(fname)
     conns = make_conn_lst(boxes)
     djs = DisjointSet(length(boxes))
 
-    foreach(((_, i, j),) -> unite!(djs, i, j), view(conns, 1:cnt))
+    foreach(((_, i, j),) -> unite!(djs, i, j), @view conns[begin:cnt])
 
     reduce(*, @view sort!(map(length, groups(djs)), alg = QuickSort, rev = true)[1:3])
 end
 
-# part two
-function loop(boxes::Vector{Box})
+function d08_p2(fname::String = "input")
+    boxes = parse_file(fname)
     conns = make_conn_lst(boxes)
     djs = DisjointSet(length(boxes))
     thr = length(boxes)
@@ -53,9 +53,6 @@ function loop(boxes::Vector{Box})
 
     @assert false "unreachable"
 end
-
-d08_p1(fname::String = "input"; thr = 1_000) = loop(parse_file(fname), thr)
-d08_p2(fname::String = "input") = loop(parse_file(fname))
 
 end #module
 
