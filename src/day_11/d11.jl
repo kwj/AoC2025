@@ -27,6 +27,7 @@ struct State
     fft::Bool
 end
 
+State(dev_name::String) = State(dev_name, false, false)
 State(x::State; dev_name = x.dev_name, dac = x.dac, fft = x.fft) = State(dev_name, dac, fft)
 
 function count_paths(devs::Dict{String, Vector{String}}, st::State, memo = Dict{State, Int}())
@@ -50,7 +51,7 @@ function count_paths(devs::Dict{String, Vector{String}}, st::State, memo = Dict{
 end
 
 d11_p1(fname::String = "input") = count_paths(parse_file(fname), "you")
-d11_p2(fname::String = "input") = count_paths(parse_file(fname), State("svr", false, false))
+d11_p2(fname::String = "input") = count_paths(parse_file(fname), State("svr"))
 
 end #module
 

@@ -2,12 +2,11 @@
 module Day12
 
 #=
-Note:
+Note: This solution is NOT general purpose.
 
-This solution is NOT general purpose.
-
-Because all presents fit into a 3x3 space, so I did preliminary
-investigation. Unexpectedly, I ended up finding the answer.
+Based on my given data, all the presents fitted within a 3x3 space.
+I therefore carried out a preliminary investigation.
+Then, unexpectedly, I found the answer.
 =#
 
 function parse_file(fname::String)
@@ -32,7 +31,7 @@ function d12_p1(fname::String = "input")
     presents, regions = parse_file(fname)
     @assert all(x -> size(x[2]) == (3, 3), presents) "invalid shape"
 
-    possible, impossible, unknown = 0, 0, 0
+    possible, impossible, uncertain = 0, 0, 0
     pops = map(first, presents)
     q = Vector{Int}()
 
@@ -44,17 +43,17 @@ function d12_p1(fname::String = "input")
             possible += 1
         else
             push!(q, idx)
-            unknown += 1
+            uncertain += 1
         end
     end
 
     # println("possible: $possible")
     # println("impossible: $impossible")
-    # println("unknown: $unknown")
-    if !iszero(unknown)
-        println("The following is a list of unknown regions:")
+    # println("uncertain: $uncertain")
+    if !iszero(uncertain)
+        println("The following is a list of regions where placement is uncertain:")
         println(q)
-        @assert false "There is at least one region where it is unclear whether presents can be placed"
+        @assert false "At least in one region, it is uncertain whether the all presents can be placed"
     end
 
     possible

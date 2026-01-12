@@ -34,17 +34,16 @@ end
 
 # a naive brute-force search
 function min_steps_lighting(light::Vector{Int}, buttons::Vector{Vector{Int}})
-    target = undigits(light, base = 2)
-    start = 0
-    seen = Set{Int}(start)
+    (target = undigits(light, base = 2)) == 0 && return 0
     btns = map(lst -> undigits(lst, base = 2), buttons)
 
+    start = 0
+    seen = Set{Int}(start)
     state = [start]
     next_state = Vector{Int}()
 
-    steps = 0
+    steps = 1
     while steps <= length(btns)
-        steps += 1
         empty!(next_state)
 
         for x1 in state, x2 in btns
@@ -56,6 +55,7 @@ function min_steps_lighting(light::Vector{Int}, buttons::Vector{Vector{Int}})
             end
         end
 
+        steps += 1
         state, next_state = next_state, state
     end
 
