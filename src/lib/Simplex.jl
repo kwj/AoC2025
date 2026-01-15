@@ -2,8 +2,8 @@
 module Simplex
 
 #=
-Note that this module was just written for the AoC 2025 Day 10 (Part 2) and has not undergone
-sufficient testing. It is low quality and therefore isn't suitable for general use.
+Note that this module was just written for the AoC 2025 Day 10 (Part 2).
+It is not suitable for general purpose use.
 =#
 
 const EPS = 1.0e-9
@@ -124,10 +124,11 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
             z .-= @view tbl[row, :]
         end
 
-        standard_simplex!(tbl, basic_vars, z)
-
         # if there is no solution, return nothing
-        !isapprox(z[end], 0.0, atol = EPS) && return nothing
+        v = standard_simplex!(tbl, basic_vars, z)
+        if isnothing(v) || !isapprox(v, 0.0, atol = EPS)
+            return nothing
+        end
 
         # if artificial variables exist among the basic variables, remove them from the basic variables if possible
         for r_idx in findall(in(artificial_cols), basic_vars)
@@ -157,7 +158,7 @@ function simplex_method(A, b, relations::AbstractVector{Symbol}, c, goal::Symbol
         end
     end
 
-    standard_simplex!(tbl, basic_vars, Z)
+    isnothing(standard_simplex!(tbl, basic_vars, Z)) && return nothing
 
     result = zeros(Float64, size(A, 2))
     for (idx, x) in pairs(basic_vars)
@@ -171,7 +172,8 @@ end
 function standard_simplex!(tbl, basic_vars, z)
     # use Brand's rule to avoid cycle
     while (c_idx = findfirst(<(-EPS), @view z[begin:end - 1]); !isnothing(c_idx))
-        (_, r_idx) = findmin(i -> tbl[i, c_idx] > EPS ? tbl[i, end] / tbl[i, c_idx] : Inf, axes(tbl, 1))
+        (v, r_idx) = findmin(i -> tbl[i, c_idx] > EPS ? tbl[i, end] / tbl[i, c_idx] : Inf, axes(tbl, 1))
+        v == Inf && return nothing
 
         tbl[r_idx, :] ./= tbl[r_idx, c_idx]
         factor = z[c_idx] / tbl[r_idx, c_idx]
@@ -186,7 +188,7 @@ function standard_simplex!(tbl, basic_vars, z)
         basic_vars[r_idx] = c_idx
     end
 
-    tbl, basic_vars, z
+    z[end]
 end
 
 # [IN]
